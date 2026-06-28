@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">EasySmartPDF</string>
+
+    <!-- Home Screen -->
+    <string name="home_title">EasySmartPDF</string>
+    <string name="feature_create_pictures">Create Pictures</string>
+    <string name="feature_create_pictures_desc">Turn your PDF into pictures.</string>
+    <string name="feature_merge_pdf">Merge PDFs</string>
+    <string name="feature_split_pdf">Split PDF</string>
+    <string name="coming_soon">Coming Soon</string>
 </resources>

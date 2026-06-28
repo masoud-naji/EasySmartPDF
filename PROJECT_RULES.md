@@ -33,6 +33,9 @@ The app should never feel technical or overwhelming.
 
 ## UX Rules
 
+- Every screen should have one obvious primary action. The user should never wonder which button to press.
+- Minimalism: If removing a visual element makes the screen easier to understand, remove it. Minimalism > Decoration.
+- The UX is frozen. Do not redesign unless requested.
 - Every screen should answer one main question.
 - Avoid too many choices at once.
 - Use large buttons.
