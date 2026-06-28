@@ -1,2 +1,14 @@
-# EasySmartPDF
-A simple, user-friendly Android PDF toolkit built with Kotlin and Jetpack Compose.
+EasySmartPDF
+
+The easiest PDF utility for Android.
+
+Built with
+
+• Kotlin
+• Jetpack Compose
+• Material 3
+• MVVM
+
+Current Status
+
+🚧 Under Development
