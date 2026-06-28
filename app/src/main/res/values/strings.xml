@@ -8,4 +8,18 @@
     <string name="feature_merge_pdf">Merge PDFs</string>
     <string name="feature_split_pdf">Split PDF</string>
     <string name="coming_soon">Coming Soon</string>
+
+    <!-- Create Pictures Screen -->
+    <string name="create_pictures_title">Create Pictures</string>
+    <string name="pdf_file_card_title">PDF File</string>
+    <string name="no_pdf_chosen_yet">No PDF chosen yet</string>
+    <string name="choose_pdf">Choose PDF</string>
+    <string name="change_file">Change File</string>
+    <string name="picture_size_card_title">Picture Size</string>
+    <string name="size_smaller">Smaller Files</string>
+    <string name="size_balanced">Balanced (Recommended)</string>
+    <string name="size_best">Best Quality</string>
+    <string name="error_open_pdf">We couldn\'t open this PDF.</string>
+    <string name="pages_count">%1$d Pages</string>
+    <string name="ready_status">Ready ✓</string>
 </resources>

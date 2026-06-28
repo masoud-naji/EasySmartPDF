@@ -4,7 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.masoudnaji.easysmartpdf.ui.screens.home.HomeScreen
+import androidx.navigation.compose.rememberNavController
+import com.masoudnaji.easysmartpdf.ui.navigation.EasySmartNavHost
 import com.masoudnaji.easysmartpdf.ui.theme.EasySmartPDFTheme
 
 class MainActivity : ComponentActivity() {
@@ -13,11 +14,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             EasySmartPDFTheme {
-                HomeScreen(
-                    onCreatePicturesClick = {
-                        // Action will be added when navigation/feature is ready
-                    }
-                )
+                val navController = rememberNavController()
+                EasySmartNavHost(navController = navController)
             }
         }
     }
