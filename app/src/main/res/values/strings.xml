@@ -14,12 +14,44 @@
     <string name="pdf_file_card_title">PDF File</string>
     <string name="no_pdf_chosen_yet">No PDF chosen yet</string>
     <string name="choose_pdf">Choose PDF</string>
-    <string name="change_file">Change File</string>
+    <string name="change_pdf">Change PDF</string>
     <string name="picture_size_card_title">Picture Size</string>
     <string name="size_smaller">Smaller Files</string>
     <string name="size_balanced">Balanced (Recommended)</string>
     <string name="size_best">Best Quality</string>
+    <string name="pages_card_title">Pages</string>
+    <string name="all_pages">All Pages</string>
+    <string name="page_range">Page Range</string>
+    <string name="from_page">From</string>
+    <string name="to_page">To</string>
+    <string name="pages_available">%1$d pages available</string>
     <string name="error_open_pdf">We couldn\'t open this PDF.</string>
-    <string name="pages_count">%1$d Pages</string>
+    <string name="pages_count">%1$d pages</string>
     <string name="ready_status">Ready ✓</string>
+
+    <!-- Progress Screen -->
+    <string name="progress_title">Creating Pictures</string>
+    <string name="progress_page_of">Page %1$d of %2$d</string>
+    <string name="progress_saving_image">Saving image %1$d…</string>
+    <string name="progress_starting">Getting ready…</string>
+
+    <!-- Success Screen -->
+    <string name="success_title">Done!</string>
+    <string name="success_pictures_count">%1$d pictures saved</string>
+    <string name="success_folder">Saved in %1$s</string>
+    <string name="open_folder">Open Folder</string>
+    <string name="back_to_home">Back to Home</string>
+
+    <!-- Cancel Conversion Dialog -->
+    <string name="cancel_dialog_title">Stop creating pictures?</string>
+    <string name="cancel_dialog_message">Pictures already created will remain saved.</string>
+    <string name="action_continue">Continue</string>
+    <string name="action_stop">Stop</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Discard Changes Dialog -->
+    <string name="discard_dialog_title">Discard changes?</string>
+    <string name="discard_dialog_message">Your selected PDF and settings will be lost.</string>
+    <string name="keep_editing">Keep Editing</string>
+    <string name="discard">Discard</string>
 </resources>
