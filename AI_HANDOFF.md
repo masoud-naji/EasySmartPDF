@@ -3,17 +3,17 @@
 # EasySmartPDF — Current Project Status
 
 Last Updated:
-2026-06-28
+2026-06-29 (output mode added)
 
 ---
 
 ## Project Goal
 
-Build the easiest PDF to Image application on Android.
+Build the easiest PDF utility app on Android.
 
 Current priority:
 
-Finish a complete PDF → Image workflow before adding any additional features.
+Split PDF Phase 1 implemented and building clean. Ready for device testing.
 
 ---
 
@@ -47,6 +47,15 @@ Finish a complete PDF → Image workflow before adding any additional features.
 * Success Screen implemented: shows total pictures saved, folder name, "Open Folder" button (opens DocumentsUI, fallback to gallery), "Back Home" button.
 * Navigation flow complete: Home → CreatePictures → Progress → Success → Home.
 * Success nav args: savedCount (Int) and folderName (String) passed via nav route.
+* Merge PDF Phase 1 implemented: add PDFs, reorderable list (drag-to-reorder via long press on handle), remove individual files, merge disabled until ≥2 PDFs selected.
+* Split PDF Phase 1 implemented: select one PDF, show filename/page count/file size, choose All Pages or Page Range (same range UI as CreatePictures), split each selected page into a separate PDF, save to Documents/EasySmartPDF/Split/<PdfName>_<yyyyMMdd_HHmm>/ with filenames page_001.pdf etc., progress screen ("Splitting page X of Y"), cancel support, success screen with file count, folder name, Open Folder, and Back Home.
+* Split PDF output mode: "Output" card appears when more than one page is selected. Default = Single PDF (all selected pages merged into one output PDF). Separate PDFs = one file per page (original behavior). `SplitConfig.separatePdfs: Boolean` routes the repository to the correct branch.
+* Merge pipeline: MergeConfig → MergePdfUseCase → MergeRepositoryImpl → PdfRenderer per page → PdfDocument output → MediaStore save.
+* Merged output: Documents/EasySmartPDF/Merged_yyyy-MM-dd_HH-mm.pdf — MediaStore.Files requires Documents or Download as root (Pictures caused IllegalArgumentException on API 29+).
+* Merge navigation: Home → MergePdf → MergeProgress → MergeSuccess → Home. Shared ViewModel pattern mirrors PDF-to-image flow.
+* MergeSuccessScreen shows output filename, "Open File" button (tries DocumentsUI, falls back to PDF viewer intent), "Back Home" button.
+* HomeScreen: Merge PDF card is now active (isAvailable = true) and navigates to MergePdfScreen.
+* HomeScreen: Split PDF card is now active (isAvailable = true) and navigates to SplitPdfScreen.
 
 ---
 
@@ -118,8 +127,6 @@ Falls back to opening the system gallery if ActivityNotFoundException.
 * Share images from Success Screen
 * Hilt dependency injection
 * OCR
-* Merge PDF
-* Split PDF
 * Scanner
 
 ---
@@ -152,10 +159,132 @@ Always continue from this file.
 
 ---
 
+## Current Feature
+
+Split PDF Phase 1 — implemented and build is clean.
+
+### Bugs fixed in MergeRepositoryImpl (2026-06-28)
+1. **Wrong RELATIVE_PATH**: `MediaStore.Files` only accepts `Documents` or `Download` as root.
+   Was: `Pictures/EasySmartPDF/Merged` → Fixed: `Documents/EasySmartPDF`.
+2. **ParcelFileDescriptor double-close**: removed outer `pfd.use` — PdfRenderer owns the pfd lifecycle.
+3. **Silent exceptions**: `.catch` now emits the actual exception class + message.
+4. **Logging**: `Log.d(TAG, ...)` added at every major step including final output URI.
+
+### Drag-and-drop fixed in MergePdfScreen (2026-06-28)
+Root cause 1: `detectDragGesturesAfterLongPress` lost the gesture to the parent `verticalScroll`
+during the 400 ms long-press wait — the parent claimed vertical movement before the long press fired.
+Root cause 2: after each swap, `currentList` (backed by `rememberUpdatedState`) still returned
+the pre-swap order for the rest of the current frame (recomposition is one frame async). So
+`indexOfFirst` found the item at its old index and swapped the wrong entry on rapid multi-step drags.
+
+Fix (MergePdfScreen.kt — `ReorderablePdfList`):
+- Replaced `detectDragGesturesAfterLongPress` with `detectDragGestures`. The drag handle is
+  an explicit drag target, so no long press is needed. `detectDragGestures` claims the gesture
+  at slop in the Main pass (child before parent), preventing the parent scroll from winning.
+- Stable `pointerInput` key: `uri.toString()` — survives recompositions from list reorders
+  without cancelling an in-progress drag (was `index`, which restarted on every reorder).
+- `rememberUpdatedState(pdfList)` — gives the coroutine the current list for `size` checks
+  and initial index lookup at drag start.
+- Local `trackedIdx` and `accumulator` inside the `pointerInput` block: updated synchronously
+  on every swap (`trackedIdx++/--`, `accumulator -= itemHeightPx`), so multi-step drags across
+  the entire list work correctly even when recomposition lags a frame.
+- `key(entry.uri.toString())` wraps each `PdfListItem` inside `forEachIndexed`. Without it,
+  `Column` uses positional reconciliation: when items swap positions Compose sees a different
+  `pointerInput` key at each slot, restarts both coroutines, and cancels the in-progress gesture
+  after every single move — forcing the user to release and re-drag. With `key()`, Compose tracks
+  composables by URI identity so the item moves in the tree instead of being recreated; the
+  `pointerInput` coroutine (and its `trackedIdx`) survives the reorder and the gesture continues
+  across the full list in one uninterrupted press-and-hold.
+
+### Progressive metadata loading (2026-06-28)
+`PdfEntry` has `isLoadingMetadata: Boolean = false`.
+`addPdf()` now two-phases:
+1. Queries `DISPLAY_NAME` synchronously (ContentResolver DB lookup, main-thread safe) and adds
+   the entry immediately with `isLoadingMetadata = true` — filename appears at once.
+2. Launches a coroutine: `withContext(IO) { readSizeAndPageCount(uri) }` reads `SIZE` and opens
+   `PdfRenderer` to get page count, then finds the entry by URI and patches it with
+   `copy(pageCount, fileSize, isLoadingMetadata = false)`.
+Each file updates individually; multi-file selections appear and resolve one by one.
+`PdfListItem` shows `"Loading details…"` while `isLoadingMetadata = true`, then the real meta line.
+Summary totals (`totalPages`, `totalSize`) automatically reflect partial state during loading.
+
+### PDF metadata in list items (2026-06-28)
+`PdfEntry` extended with `pageCount: Int` and `fileSize: Long`.
+`addPdf()` now launches `withContext(Dispatchers.IO) { buildPdfEntry(uri) }` which:
+- queries `OpenableColumns.DISPLAY_NAME` + `OpenableColumns.SIZE` in one ContentResolver call
+- opens a `PdfRenderer` to read `pageCount`, then closes it (PdfRenderer owns the pfd lifecycle)
+- double-checks for duplicates after IO before updating state (concurrent-add guard)
+`PdfListItem` shows `"N pages • X.X MB"` as a second line using `Formatter.formatShortFileSize`.
+Line is omitted entirely if both values are zero (graceful failure).
+`index`/`total` parameters removed from `PdfListItem` (were only used for "File X of Y" display).
+
+### PDF list summary (MergePdfScreen)
+When the list is non-empty, two `Text` lines appear above `ReorderablePdfList` inside the card:
+- Line 1: `pluralStringResource(R.plurals.merge_summary_count, count, count)` → "5 PDFs selected"
+- Line 2: `"$totalPages pages • ${Formatter.formatShortFileSize(context, totalSize)}"` → "146 pages • 142 MB"
+  (only rendered when at least one value is non-zero; each part omitted if its value is zero)
+Both recompute from `uiState.pdfList` on every recomposition — automatically reflects add/remove/reorder.
+Typography: `bodyLarge`/`onSurface` for count; `bodySmall`/`outline` for pages+size (matches existing card style).
+
+### "Add More PDFs" button (MergePdfScreen)
+The existing `SecondaryButton` at the bottom of the card changes its label based on list state:
+- Empty list → "Add PDF" (`merge_add_pdf`)
+- Non-empty list → "Add More PDFs" (`merge_add_more_pdf`)
+Same position, same action (opens multi-file picker), same duplicate detection.
+
+### Multi-file picker (MergePdfScreen — pdfPickerLauncher)
+`OpenDocument()` replaced with `OpenMultipleDocuments()`. Result callback iterates the returned
+list and calls `viewModel.addPdf(uri)` for each entry. Duplicate detection in `addPdf()` already
+handles repeated URIs across selections — each duplicate shows the Snackbar and is skipped.
+
+### Duplicate PDF detection (MergePdfViewModel — addPdf)
+`addPdf()` checks `pdfList.any { it.uri == uri }` before adding. If duplicate, sets
+`errorMessage = "This PDF has already been added."` and returns. `MergePdfScreen` shows
+this via `LaunchedEffect(uiState.errorMessage) → snackbarHostState.showSnackbar(...)` then
+calls `onErrorDismissed()` to clear it.
+
+### Known follow-up (low priority)
+NavGraph's `openMergedFile()` still references the old `Pictures/EasySmartPDF/Merged/` DocumentsUI path.
+The "Open File" button on the Success screen may not open the file until this is updated.
+
+## Split PDF — Implementation Details
+
+### Output mode (added same session)
+- `SplitOutputMode` enum in `SplitPdfUiState.kt`: SINGLE_PDF (default) / SEPARATE_PDFS
+- `SplitConfig.separatePdfs: Boolean` — domain-layer flag; ViewModel maps `outputMode == SEPARATE_PDFS`
+- `SplitRepositoryImpl`: two branches — Separate PDFs (unchanged: one PdfDocument per page, subfolder); Single PDF (all pages into one PdfDocument, no subfolder, `folderName=""` in Completed event)
+- `SplitPdfScreen`: Output card (Card 3) visible when `selectedPageCount > 1`; hidden for single-page PDFs/ranges
+- `SplitSuccessScreen`: empty `folderName` → "Saved in Documents/EasySmartPDF/Split"; non-empty → "Saved in <folderName>"
+- `openSplitFolder` in NavGraph: `folderName.isEmpty()` → opens `primary:Documents/EasySmartPDF/Split`
+
+### New files (Split PDF Phase 1)
+- `domain/model/SplitConfig.kt` — pdfUri, folderName, pagesToSplit (1-based list)
+- `domain/model/SplitEvent.kt` — Started / Progress / Completed / Failed
+- `domain/repository/SplitRepository.kt` — interface
+- `domain/usecase/SplitPdfUseCase.kt` — delegates to SplitRepository
+- `data/repository/SplitRepositoryImpl.kt` — PdfRenderer opens source once; each page rendered to bitmap → PdfDocument (1 page) → MediaStore. RELATIVE_PATH = Documents/EasySmartPDF/Split/<folderName>
+- `ui/screens/split/SplitPdfUiState.kt` — SplitPdfUiState + SplitPageMode enum + SplitState sealed interface
+- `ui/screens/split/SplitPdfViewModel.kt` — AndroidViewModel; queries fileSize via ContentResolver alongside PdfInfo
+- `ui/screens/split/SplitPdfScreen.kt` — PDF picker, file info card (name/pages/size), page selection card (All / Range with slider+input identical to CreatePictures)
+- `ui/screens/split/SplitProgressScreen.kt` — "Splitting page X of Y", LinearProgressIndicator, Cancel with dialog
+- `ui/screens/split/SplitSuccessScreen.kt` — file count, folder name, Open Folder, Back Home
+
+### Output path
+`Documents/EasySmartPDF/Split/<PdfName>_<yyyyMMdd_HHmm>/page_001.pdf`
+
+### Navigation
+Home → SplitPdf → SplitProgress → SplitSuccess → Home.
+Shared ViewModel pattern: SplitProgressScreen receives SplitPdf back-stack entry.
+
+### Open Folder
+`openSplitFolder()` in NavGraph: docId = `primary:Documents/EasySmartPDF/Split/<folderName>`. Same DocumentsUI intent pattern as other features.
+
 ## Next Expected Step
 
-Resolve the open decisions above (data source layer, use case location, Hilt, API 26-28 subfolder).
+1. Test Split PDF on device — pick PDF, split all pages, verify files in Documents/EasySmartPDF/Split/.
+2. Test Page Range split — verify only selected pages are saved.
+3. Test Cancel — verify partial files remain, navigation returns to SplitPdfScreen.
+4. Fix NavGraph `openMergedFile()` path if still needed.
+5. Resolve open decisions (data source layer, use case location, Hilt, API 26-28 storage).
 
-Then implement runtime WRITE_EXTERNAL_STORAGE permission request for API 26-28.
-
-Stop after implementation. Wait for review.
+Stop after each step. Wait for review.
