@@ -49,6 +49,45 @@
     <string name="action_stop">Stop</string>
     <string name="cancel">Cancel</string>
 
+    <!-- Merge PDF Screen -->
+    <string name="merge_pdf_title">Merge PDFs</string>
+    <string name="merge_files_card_title">PDF Files</string>
+    <string name="merge_no_files_yet">No PDFs added yet.</string>
+    <string name="merge_add_pdf">Add PDF</string>
+    <string name="merge_add_more_pdf">Add More PDFs</string>
+    <string name="merge_action">Merge</string>
+    <string name="merge_loading_details">Loading details…</string>
+    <string name="merge_need_two_files">Add at least 2 PDFs to merge.</string>
+    <string name="merge_remove_file">Remove</string>
+    <string name="merge_drag_handle">Drag to reorder</string>
+    <string name="merge_file_number">File %1$d of %2$d</string>
+    <string name="merge_cancel_dialog_title">Stop merging?</string>
+    <string name="merge_progress_page_of">Page %1$d of %2$d</string>
+    <string name="merge_progress_merging">Merging page %1$d…</string>
+    <string name="merge_success_message">Your PDFs have been merged.</string>
+    <string name="merge_open_file">Open File</string>
+    <string name="feature_merge_pdf_desc">Combine multiple PDFs into one.</string>
+
+    <!-- Merge PDF summary -->
+    <plurals name="merge_summary_count">
+        <item quantity="one">%d PDF selected</item>
+        <item quantity="other">%d PDFs selected</item>
+    </plurals>
+
+    <!-- Split PDF Screen -->
+    <string name="split_pdf_title">Split PDF</string>
+    <string name="split_pages_card_title">Pages to Split</string>
+    <string name="split_action">Split PDF</string>
+    <string name="split_cancel_dialog_title">Stop splitting?</string>
+    <string name="split_progress_page_of">Splitting page %1$d of %2$d</string>
+    <string name="split_output_card_title">Output</string>
+    <string name="split_output_single_pdf">Single PDF</string>
+    <string name="split_output_separate_pdfs">Separate PDFs</string>
+    <string name="split_success_files_count">%1$d PDF files created</string>
+    <string name="split_success_folder">Saved in %1$s</string>
+    <string name="split_success_single_location">Saved in Documents/EasySmartPDF/Split</string>
+    <string name="feature_split_pdf_desc">Split a PDF into separate files.</string>
+
     <!-- Discard Changes Dialog -->
     <string name="discard_dialog_title">Discard changes?</string>
     <string name="discard_dialog_message">Your selected PDF and settings will be lost.</string>

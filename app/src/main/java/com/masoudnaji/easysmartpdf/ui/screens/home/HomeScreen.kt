@@ -11,7 +11,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddPhotoAlternate
-import androidx.compose.material.icons.filled.CallMerge
+import androidx.compose.material.icons.automirrored.filled.CallMerge
 import androidx.compose.material.icons.filled.ContentCut
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,9 +25,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.masoudnaji.easysmartpdf.R
 import com.masoudnaji.easysmartpdf.ui.components.AppCard
+import com.masoudnaji.easysmartpdf.ui.components.PrimaryButton
 import com.masoudnaji.easysmartpdf.ui.theme.AppIconSize
 import com.masoudnaji.easysmartpdf.ui.theme.EasySmartPDFTheme
 import com.masoudnaji.easysmartpdf.ui.theme.Spacing
@@ -36,6 +38,8 @@ import com.masoudnaji.easysmartpdf.ui.theme.Spacing
 @Composable
 fun HomeScreen(
     onCreatePicturesClick: () -> Unit,
+    onMergePdfClick: () -> Unit,
+    onSplitPdfClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -47,7 +51,7 @@ fun HomeScreen(
                         style = MaterialTheme.typography.titleLarge
                     )
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface
                 )
             )
@@ -64,31 +68,31 @@ fun HomeScreen(
         ) {
             Spacer(modifier = Modifier.height(Spacing.sm))
 
-            // Primary Feature: Create Pictures
             FeatureCard(
                 title = stringResource(R.string.feature_create_pictures),
                 description = stringResource(R.string.feature_create_pictures_desc),
+                buttonText = stringResource(R.string.feature_create_pictures),
                 icon = Icons.Default.AddPhotoAlternate,
                 onClick = onCreatePicturesClick,
                 isAvailable = true
             )
 
-            // Future Feature: Merge PDFs
             FeatureCard(
                 title = stringResource(R.string.feature_merge_pdf),
-                description = stringResource(R.string.coming_soon),
-                icon = Icons.Default.CallMerge,
-                onClick = {},
-                isAvailable = false
+                description = stringResource(R.string.feature_merge_pdf_desc),
+                buttonText = stringResource(R.string.feature_merge_pdf),
+                icon = Icons.AutoMirrored.Filled.CallMerge,
+                onClick = onMergePdfClick,
+                isAvailable = true
             )
 
-            // Future Feature: Split PDF
             FeatureCard(
                 title = stringResource(R.string.feature_split_pdf),
-                description = stringResource(R.string.coming_soon),
+                description = stringResource(R.string.feature_split_pdf_desc),
+                buttonText = stringResource(R.string.feature_split_pdf),
                 icon = Icons.Default.ContentCut,
-                onClick = {},
-                isAvailable = false
+                onClick = onSplitPdfClick,
+                isAvailable = true
             )
 
             Spacer(modifier = Modifier.height(Spacing.xl))
@@ -100,14 +104,13 @@ fun HomeScreen(
 private fun FeatureCard(
     title: String,
     description: String,
+    buttonText: String,
     icon: ImageVector,
     onClick: () -> Unit,
     isAvailable: Boolean,
     modifier: Modifier = Modifier
 ) {
-    AppCard(
-        modifier = modifier
-    ) {
+    AppCard(modifier = modifier) {
         Column(
             modifier = Modifier
                 .padding(Spacing.sm)
@@ -121,28 +124,25 @@ private fun FeatureCard(
                 modifier = Modifier.size(AppIconSize.medium),
                 tint = if (isAvailable) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
             )
-            
+
             Spacer(modifier = Modifier.height(Spacing.md))
-            
+
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleLarge,
                 color = if (isAvailable) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.outline
             )
-            
+
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.outline,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                textAlign = TextAlign.Center
             )
-            
+
             if (isAvailable) {
                 Spacer(modifier = Modifier.height(Spacing.md))
-                com.masoudnaji.easysmartpdf.ui.components.PrimaryButton(
-                    text = stringResource(R.string.feature_create_pictures),
-                    onClick = onClick
-                )
+                PrimaryButton(text = buttonText, onClick = onClick)
             }
         }
     }
@@ -152,6 +152,6 @@ private fun FeatureCard(
 @Composable
 fun HomeScreenPreview() {
     EasySmartPDFTheme {
-        HomeScreen(onCreatePicturesClick = {})
+        HomeScreen(onCreatePicturesClick = {}, onMergePdfClick = {}, onSplitPdfClick = {})
     }
 }
