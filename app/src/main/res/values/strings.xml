@@ -7,6 +7,7 @@
     <string name="feature_create_pictures_desc">Turn your PDF into pictures.</string>
     <string name="feature_merge_pdf">Merge PDFs</string>
     <string name="feature_split_pdf">Split PDF</string>
+    <string name="feature_image_to_pdf">Image to PDF</string>
     <string name="coming_soon">Coming Soon</string>
 
     <!-- Create Pictures Screen -->
@@ -87,6 +88,44 @@
     <string name="split_success_folder">Saved in %1$s</string>
     <string name="split_success_single_location">Saved in Documents/EasySmartPDF/Split</string>
     <string name="feature_split_pdf_desc">Split a PDF into separate files.</string>
+
+    <!-- Image to PDF Screen -->
+    <string name="feature_image_to_pdf_desc">Turn your images into a PDF.</string>
+    <string name="image_to_pdf_title">Image to PDF</string>
+    <string name="image_to_pdf_images_card_title">Images</string>
+    <string name="image_to_pdf_no_images_yet">No images added yet.</string>
+    <string name="image_to_pdf_add_images">Add Images</string>
+    <string name="image_to_pdf_add_more_images">Add More Images</string>
+    <string name="image_to_pdf_loading_details">Loading…</string>
+    <string name="image_to_pdf_options_card_title">PDF Options</string>
+    <string name="image_to_pdf_page_size_label">Page Size</string>
+    <string name="image_to_pdf_a4">A4</string>
+    <string name="image_to_pdf_letter">Letter</string>
+    <string name="image_to_pdf_orientation_label">Orientation</string>
+    <string name="image_to_pdf_portrait">Portrait</string>
+    <string name="image_to_pdf_landscape">Landscape</string>
+    <string name="image_to_pdf_margins_label">Margins</string>
+    <string name="image_to_pdf_margin_none">None</string>
+    <string name="image_to_pdf_margin_small">Small</string>
+    <string name="image_to_pdf_margin_medium">Medium</string>
+    <string name="image_to_pdf_quality_label">Quality</string>
+    <string name="image_to_pdf_quality_original">Original (largest file)</string>
+    <string name="image_to_pdf_quality_high">High (recommended)</string>
+    <string name="image_to_pdf_quality_medium">Medium (smallest file)</string>
+    <string name="image_to_pdf_fit_mode_label">Fit Mode</string>
+    <string name="image_to_pdf_fit_to_page">Fit to page</string>
+    <string name="image_to_pdf_crop_to_fill">Crop to fill</string>
+    <string name="image_to_pdf_action">Create PDF</string>
+    <string name="image_to_pdf_progress_creating">Creating page %1$d of %2$d…</string>
+    <string name="image_to_pdf_cancel_dialog_title">Stop creating PDF?</string>
+    <string name="image_to_pdf_success_message">Your PDF has been created.</string>
+    <string name="image_to_pdf_open_file">Open File</string>
+
+    <!-- Image to PDF summary -->
+    <plurals name="image_to_pdf_summary_count">
+        <item quantity="one">%d image selected</item>
+        <item quantity="other">%d images selected</item>
+    </plurals>
 
     <!-- Discard Changes Dialog -->
     <string name="discard_dialog_title">Discard changes?</string>

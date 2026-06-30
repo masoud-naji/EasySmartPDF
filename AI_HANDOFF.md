@@ -3,7 +3,7 @@
 # EasySmartPDF — Current Project Status
 
 Last Updated:
-2026-06-29 (output mode added)
+2026-06-29 (Image to PDF implemented)
 
 ---
 
@@ -56,6 +56,8 @@ Split PDF Phase 1 implemented and building clean. Ready for device testing.
 * MergeSuccessScreen shows output filename, "Open File" button (tries DocumentsUI, falls back to PDF viewer intent), "Back Home" button.
 * HomeScreen: Merge PDF card is now active (isAvailable = true) and navigates to MergePdfScreen.
 * HomeScreen: Split PDF card is now active (isAvailable = true) and navigates to SplitPdfScreen.
+* Image to PDF implemented: select multiple images, reorder via drag-and-drop, configure PDF options (page size, orientation, margins, quality, fit mode), create PDF saved to Documents/EasySmartPDF/, Open File on success.
+* HomeScreen: Image to PDF card active, compact 4-card layout (28dp icon, titleMedium, bodySmall, Spacing.sm gaps) fits without scrolling on modern phones.
 
 ---
 
@@ -127,7 +129,7 @@ Falls back to opening the system gallery if ActivityNotFoundException.
 * Share images from Success Screen
 * Hilt dependency injection
 * OCR
-* Scanner
+* Scanner (Scan to PDF)
 
 ---
 
@@ -279,12 +281,50 @@ Shared ViewModel pattern: SplitProgressScreen receives SplitPdf back-stack entry
 ### Open Folder
 `openSplitFolder()` in NavGraph: docId = `primary:Documents/EasySmartPDF/Split/<folderName>`. Same DocumentsUI intent pattern as other features.
 
+## Image to PDF — Implementation Details
+
+### New files
+- `domain/model/ImageEntry.kt` — uri, displayName, width, height, fileSize, isLoadingMetadata
+- `domain/model/ImageToPdfConfig.kt` — config + enums: PdfPageSize, PdfOrientation, PdfMargin, PdfOutputQuality, FitMode
+- `domain/model/ImageToPdfEvent.kt` — Started / Progress / Completed / Failed
+- `domain/repository/ImageToPdfRepository.kt` — interface
+- `domain/usecase/ImageToPdfUseCase.kt` — delegates to repository
+- `data/repository/ImageToPdfRepositoryImpl.kt` — BitmapFactory decode → PdfDocument → MediaStore
+- `ui/screens/imagetopdf/ImageToPdfUiState.kt` — state + ImageToPdfState sealed interface
+- `ui/screens/imagetopdf/ImageToPdfViewModel.kt` — two-phase add, thumbnail loading, auto-orientation
+- `ui/screens/imagetopdf/ImageToPdfScreen.kt` — image list + drag-drop + PDF options card
+- `ui/screens/imagetopdf/ImageToPdfProgressScreen.kt` — shared ViewModel pattern
+- `ui/screens/imagetopdf/ImageToPdfSuccessScreen.kt` — fileName + Open File + Back Home
+
+### Key decisions
+- `PdfOutputQuality` renamed from `ImageQuality` to avoid conflict with existing PDF-to-image enum
+- Quality affects page resolution: ORIGINAL=300DPI (A4: 2480×3508), HIGH=150DPI (1240×1754), MEDIUM=72DPI (595×842)
+- FitMode.FIT: scale to fit, letterbox; FitMode.CROP: scale to fill, clip to margin rect
+- Auto-orientation: when list.size==1 and !orientationIsManual, set portrait/landscape from image aspect ratio
+- Thumbnails: stored as `Map<String, ImageBitmap>` in a separate StateFlow, loaded via loadThumbnail() (API 29+: ContentResolver.loadThumbnail; API 26-28: BitmapFactory + inSampleSize)
+- `queryPdfUri()` extracted as shared helper in NavGraph (both openMergedFile and openImageToPdfFile use it)
+- Output: Documents/EasySmartPDF/Images_yyyy-MM-dd_HH-mm.pdf
+- Navigation: Home → ImageToPdf → ImageToPdfProgress → ImageToPdfSuccess/{fileName} → Home
+
+### HomeScreen compact layout
+- Removed inner Column padding(Spacing.sm) from FeatureCard
+- Icon: 48dp → 28dp
+- Spacer after icon: 16dp → 4dp (Spacing.xs)
+- Title: titleLarge → titleMedium
+- Description: bodyLarge → bodySmall
+- Spacer before button: 16dp → 4dp (Spacing.xs)
+- Card gap: Spacing.md (16dp) → Spacing.sm (8dp)
+- Removed trailing Spacer(xl) at bottom
+- Added `onImageToPdfClick` parameter and Icons.Default.Image icon
+
 ## Next Expected Step
 
-1. Test Split PDF on device — pick PDF, split all pages, verify files in Documents/EasySmartPDF/Split/.
-2. Test Page Range split — verify only selected pages are saved.
-3. Test Cancel — verify partial files remain, navigation returns to SplitPdfScreen.
-4. Fix NavGraph `openMergedFile()` path if still needed.
-5. Resolve open decisions (data source layer, use case location, Hilt, API 26-28 storage).
+1. Test Image to PDF on device — add images, create PDF, verify in Documents/EasySmartPDF/.
+2. Test auto-orientation — add 1 landscape image, verify orientation auto-sets to Landscape.
+3. Test drag-to-reorder in image list.
+4. Test Cancel during creation.
+5. Test Split PDF on device.
+6. Fix NavGraph openMergedFile() path if still needed.
+7. Resolve open decisions (data source layer, use case location, Hilt, API 26-28 storage).
 
 Stop after each step. Wait for review.

@@ -18,6 +18,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.masoudnaji.easysmartpdf.ui.screens.home.HomeScreen
+import com.masoudnaji.easysmartpdf.ui.screens.imagetopdf.ImageToPdfProgressScreen
+import com.masoudnaji.easysmartpdf.ui.screens.imagetopdf.ImageToPdfScreen
+import com.masoudnaji.easysmartpdf.ui.screens.imagetopdf.ImageToPdfSuccessScreen
 import com.masoudnaji.easysmartpdf.ui.screens.merge.MergePdfScreen
 import com.masoudnaji.easysmartpdf.ui.screens.merge.MergeProgressScreen
 import com.masoudnaji.easysmartpdf.ui.screens.merge.MergeSuccessScreen
@@ -39,6 +42,9 @@ object Screen {
     const val SplitPdf = "split_pdf"
     const val SplitProgress = "split_progress"
     const val SplitSuccessRoute = "split_success/{fileCount}/{folderName}"
+    const val ImageToPdf = "image_to_pdf"
+    const val ImageToPdfProgress = "image_to_pdf_progress"
+    const val ImageToPdfSuccessRoute = "image_to_pdf_success/{fileName}"
 
     fun successDestination(savedCount: Int, folderName: String) =
         "success/$savedCount/${Uri.encode(folderName)}"
@@ -48,6 +54,9 @@ object Screen {
 
     fun splitSuccessDestination(fileCount: Int, folderName: String) =
         "split_success/$fileCount/${Uri.encode(folderName)}"
+
+    fun imageToPdfSuccessDestination(fileName: String) =
+        "image_to_pdf_success/${Uri.encode(fileName)}"
 }
 
 @Composable
@@ -64,7 +73,8 @@ fun EasySmartNavHost(
             HomeScreen(
                 onCreatePicturesClick = { navController.navigate(Screen.CreatePictures) },
                 onMergePdfClick = { navController.navigate(Screen.MergePdf) },
-                onSplitPdfClick = { navController.navigate(Screen.SplitPdf) }
+                onSplitPdfClick = { navController.navigate(Screen.SplitPdf) },
+                onImageToPdfClick = { navController.navigate(Screen.ImageToPdf) }
             )
         }
 
@@ -201,6 +211,49 @@ fun EasySmartNavHost(
                 }
             )
         }
+
+        // Image to PDF flow
+        composable(Screen.ImageToPdf) {
+            ImageToPdfScreen(
+                onBackClick = { navController.popBackStack() },
+                onNavigateToProgress = { navController.navigate(Screen.ImageToPdfProgress) }
+            )
+        }
+
+        composable(Screen.ImageToPdfProgress) { backStackEntry ->
+            val imageToPdfEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(Screen.ImageToPdf)
+            }
+            ImageToPdfProgressScreen(
+                imageToPdfEntry = imageToPdfEntry,
+                onCreateComplete = { fileName ->
+                    navController.navigate(Screen.imageToPdfSuccessDestination(fileName)) {
+                        popUpTo(Screen.ImageToPdf) { inclusive = true }
+                    }
+                },
+                onCreateFailed = { navController.popBackStack() },
+                onCreateCancelled = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = Screen.ImageToPdfSuccessRoute,
+            arguments = listOf(
+                navArgument("fileName") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val fileName = backStackEntry.arguments?.getString("fileName") ?: ""
+            val context = LocalContext.current
+            ImageToPdfSuccessScreen(
+                fileName = fileName,
+                onOpenFile = { openImageToPdfFile(context, fileName) },
+                onBackToHome = {
+                    navController.navigate(Screen.Home) {
+                        popUpTo(Screen.Home) { inclusive = true }
+                    }
+                }
+            )
+        }
     }
 }
 
@@ -226,7 +279,27 @@ private fun openFolder(context: Context, folderName: String) {
 }
 
 private fun openMergedFile(context: Context, fileName: String) {
-    val fileUri = queryMergedPdfUri(context, fileName)
+    val fileUri = queryPdfUri(context, fileName)
+    if (fileUri != null) {
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            setDataAndType(fileUri, "application/pdf")
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+        }
+        try {
+            context.startActivity(intent)
+            return
+        } catch (_: ActivityNotFoundException) { }
+    }
+    try {
+        context.startActivity(Intent(Intent.ACTION_VIEW).apply {
+            type = "application/pdf"
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        })
+    } catch (_: ActivityNotFoundException) { }
+}
+
+private fun openImageToPdfFile(context: Context, fileName: String) {
+    val fileUri = queryPdfUri(context, fileName)
     if (fileUri != null) {
         val intent = Intent(Intent.ACTION_VIEW).apply {
             setDataAndType(fileUri, "application/pdf")
@@ -269,7 +342,7 @@ private fun openSplitFolder(context: Context, folderName: String) {
     } catch (_: ActivityNotFoundException) { }
 }
 
-private fun queryMergedPdfUri(context: Context, fileName: String): Uri? {
+private fun queryPdfUri(context: Context, fileName: String): Uri? {
     val collection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
         MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL)
     else
