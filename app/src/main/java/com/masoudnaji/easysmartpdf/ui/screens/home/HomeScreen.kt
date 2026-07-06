@@ -1,37 +1,48 @@
 package com.masoudnaji.easysmartpdf.ui.screens.home
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddPhotoAlternate
-import androidx.compose.material.icons.automirrored.filled.CallMerge
-import androidx.compose.material.icons.filled.ContentCut
-import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.masoudnaji.easysmartpdf.R
 import com.masoudnaji.easysmartpdf.ui.components.AppCard
-import com.masoudnaji.easysmartpdf.ui.components.PrimaryButton
-import com.masoudnaji.easysmartpdf.ui.theme.AppIconSize
+import com.masoudnaji.easysmartpdf.ui.components.FeatureIllustration
+import com.masoudnaji.easysmartpdf.ui.components.PdfOperation
 import com.masoudnaji.easysmartpdf.ui.theme.EasySmartPDFTheme
+import com.masoudnaji.easysmartpdf.ui.theme.Radius
 import com.masoudnaji.easysmartpdf.ui.theme.Spacing
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,21 +51,44 @@ fun HomeScreen(
     onCreatePicturesClick: () -> Unit,
     onMergePdfClick: () -> Unit,
     onSplitPdfClick: () -> Unit,
+    onImageToPdfClick: () -> Unit,
+    onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.home_title),
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
-            )
+            Surface(
+                color = MaterialTheme.colorScheme.surface,
+                modifier = Modifier.fillMaxWidth(),
+                shadowElevation = 1.dp
+            ) {
+                Column {
+                    Spacer(Modifier.statusBarsPadding())
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = stringResource(R.string.home_title),
+                            style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp),
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        IconButton(
+                            onClick = onSettingsClick,
+                            modifier = Modifier.align(Alignment.CenterEnd)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Settings,
+                                contentDescription = stringResource(R.string.settings_title),
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+            }
         },
         modifier = modifier
     ) { innerPadding ->
@@ -69,30 +103,35 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(Spacing.sm))
 
             FeatureCard(
-                title = stringResource(R.string.feature_create_pictures),
-                description = stringResource(R.string.feature_create_pictures_desc),
-                buttonText = stringResource(R.string.feature_create_pictures),
-                icon = Icons.Default.AddPhotoAlternate,
-                onClick = onCreatePicturesClick,
-                isAvailable = true
+                title = stringResource(R.string.feature_pdf_to_images_title),
+                description = stringResource(R.string.feature_pdf_to_images_desc),
+                actionText = stringResource(R.string.feature_pdf_to_images_action),
+                illustration = { FeatureIllustration(PdfOperation.PDF_TO_IMAGES) },
+                onClick = onCreatePicturesClick
             )
 
             FeatureCard(
-                title = stringResource(R.string.feature_merge_pdf),
-                description = stringResource(R.string.feature_merge_pdf_desc),
-                buttonText = stringResource(R.string.feature_merge_pdf),
-                icon = Icons.AutoMirrored.Filled.CallMerge,
-                onClick = onMergePdfClick,
-                isAvailable = true
+                title = stringResource(R.string.feature_merge_pdfs_title),
+                description = stringResource(R.string.feature_merge_pdfs_desc),
+                actionText = stringResource(R.string.feature_merge_pdfs_action),
+                illustration = { FeatureIllustration(PdfOperation.MERGE_PDFS) },
+                onClick = onMergePdfClick
             )
 
             FeatureCard(
-                title = stringResource(R.string.feature_split_pdf),
+                title = stringResource(R.string.feature_split_pdf_title),
                 description = stringResource(R.string.feature_split_pdf_desc),
-                buttonText = stringResource(R.string.feature_split_pdf),
-                icon = Icons.Default.ContentCut,
-                onClick = onSplitPdfClick,
-                isAvailable = true
+                actionText = stringResource(R.string.feature_split_pdf_action),
+                illustration = { FeatureIllustration(PdfOperation.SPLIT_PDF) },
+                onClick = onSplitPdfClick
+            )
+
+            FeatureCard(
+                title = stringResource(R.string.feature_images_to_pdf_title),
+                description = stringResource(R.string.feature_images_to_pdf_desc),
+                actionText = stringResource(R.string.feature_images_to_pdf_action),
+                illustration = { FeatureIllustration(PdfOperation.IMAGES_TO_PDF) },
+                onClick = onImageToPdfClick
             )
 
             Spacer(modifier = Modifier.height(Spacing.xl))
@@ -104,45 +143,66 @@ fun HomeScreen(
 private fun FeatureCard(
     title: String,
     description: String,
-    buttonText: String,
-    icon: ImageVector,
+    actionText: String,
+    illustration: @Composable () -> Unit,
     onClick: () -> Unit,
-    isAvailable: Boolean,
     modifier: Modifier = Modifier
 ) {
-    AppCard(modifier = modifier) {
-        Column(
+    AppCard(
+        modifier = modifier.clickable(onClick = onClick),
+        containerColor = Color.White
+    ) {
+        Row(
             modifier = Modifier
-                .padding(Spacing.sm)
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .fillMaxWidth()
+                .height(70.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(AppIconSize.medium),
-                tint = if (isAvailable) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
-            )
+            Box(
+                modifier = Modifier
+                    .weight(0.5f)
+                    .fillMaxHeight(),
+                contentAlignment = Alignment.Center
+            ) {
+                illustration()
+            }
 
-            Spacer(modifier = Modifier.height(Spacing.md))
+            Column(
+                modifier = Modifier.weight(0.32f),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium.copy(fontSize = 15.sp),
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1
+                )
 
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge,
-                color = if (isAvailable) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.outline
-            )
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
+                    color = MaterialTheme.colorScheme.outline,
+                    lineHeight = 13.sp,
+                    maxLines = 3
+                )
+            }
 
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.outline,
-                textAlign = TextAlign.Center
-            )
-
-            if (isAvailable) {
-                Spacer(modifier = Modifier.height(Spacing.md))
-                PrimaryButton(text = buttonText, onClick = onClick)
+            Box(
+                modifier = Modifier
+                    .weight(0.18f)
+                    .size(60.dp, 28.dp)
+                    .clip(RoundedCornerShape(Radius.sm))
+                    .background(MaterialTheme.colorScheme.primary),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = actionText,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp),
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }
@@ -152,6 +212,12 @@ private fun FeatureCard(
 @Composable
 fun HomeScreenPreview() {
     EasySmartPDFTheme {
-        HomeScreen(onCreatePicturesClick = {}, onMergePdfClick = {}, onSplitPdfClick = {})
+        HomeScreen(
+            onCreatePicturesClick = {},
+            onMergePdfClick = {},
+            onSplitPdfClick = {},
+            onImageToPdfClick = {},
+            onSettingsClick = {}
+        )
     }
 }
