@@ -3,7 +3,7 @@
 # EasySmartPDF — Current Project Status
 
 Last Updated:
-2026-06-29 (Image to PDF implemented)
+2026-07-05 (Manual illustration control system implemented)
 
 ---
 
@@ -58,6 +58,7 @@ Split PDF Phase 1 implemented and building clean. Ready for device testing.
 * HomeScreen: Split PDF card is now active (isAvailable = true) and navigates to SplitPdfScreen.
 * Image to PDF implemented: select multiple images, reorder via drag-and-drop, configure PDF options (page size, orientation, margins, quality, fit mode), create PDF saved to Documents/EasySmartPDF/, Open File on success.
 * HomeScreen: Image to PDF card active, compact 4-card layout (28dp icon, titleMedium, bodySmall, Spacing.sm gaps) fits without scrolling on modern phones.
+* Settings screen implemented: Appearance (System/Light/Dark theme via DataStore), Language (dialog with English/فارسی, preference stored, locale switching deferred), About (app name, version, privacy policy placeholder). Settings icon in Home top bar. Theme applied live at Activity level via SettingsViewModel.
 
 ---
 
@@ -317,14 +318,130 @@ Shared ViewModel pattern: SplitProgressScreen receives SplitPdf back-stack entry
 - Removed trailing Spacer(xl) at bottom
 - Added `onImageToPdfClick` parameter and Icons.Default.Image icon
 
+## Release Preparation — Completed 2026-06-29
+
+### Files modified
+- `app/build.gradle.kts` — added `signingConfigs { release {} }` reading from `keystore.properties`; `isMinifyEnabled = true`; `isShrinkResources = true`; signingConfig only wired when `keystore.properties` exists
+- `app/proguard-rules.pro` — added: stack trace attributes, Kotlin metadata keep, Coroutines volatile field keeps, enum values()/valueOf() keeps
+- `app/src/main/AndroidManifest.xml` — added `<queries>` block for `ACTION_VIEW / application/pdf` (required on API 30+ to resolve a PDF viewer)
+- `.gitignore` — added `keystore.properties`, `*.jks`, `*.keystore`
+- `keystore.properties.template` — new template file; copy to `keystore.properties` and fill credentials before signing
+
+### Signing workflow (before first release)
+1. Generate keystore: `keytool -genkey -v -keystore easymartpdf-release.jks -keyalg RSA -keysize 2048 -validity 10000 -alias easymartpdf`
+2. Copy `keystore.properties.template` → `keystore.properties` in project root
+3. Fill in `storeFile`, `storePassword`, `keyAlias`, `keyPassword`
+4. Build signed release: `./gradlew assembleRelease` or use Build → Generate Signed APK/Bundle
+
+### Icon status
+- Adaptive icon XML structure: ✅ complete (`mipmap-anydpi-v26/ic_launcher.xml` with background + foreground + monochrome)
+- Fallback WebP bitmaps: ✅ all densities present (mdpi, hdpi, xhdpi, xxhdpi, xxxhdpi)
+- Foreground content: ⚠️ verify that the WebP bitmaps are custom-branded — may still be the default Android Studio placeholder robot icon
+
+## Composable Illustrations — Implementation Details (2026-07-04)
+
+### Motivation
+Replaced 8 combined illustration PNGs (4 LTR + 4 RTL variants) with a single `FeatureIllustration` composable built from two reusable assets: `ic_pdf.png` and `ic_images.png`.
+
+### New file
+`ui/components/FeatureIllustration.kt`:
+- `enum class PdfOperation { PDF_TO_IMAGES, MERGE_PDFS, SPLIT_PDF, IMAGES_TO_PDF }`
+- `@Composable fun FeatureIllustration(operation: PdfOperation)`
+- Layouts: single pair (PDF↔Images) or stacked pair with arrow (Merge/Split)
+- Arrow: `Icons.AutoMirrored.Filled.ArrowForward` — flips automatically in RTL
+- PNGs are never mirrored; Row layout mirrors in RTL via `LocalLayoutDirection`
+- Icon sizes: 48dp (single large), 26dp (stacked pair items), 18dp (arrow)
+
+### Modified files
+- `HomeScreen.kt`: `FeatureCard(imageRes: Int)` → `FeatureCard(illustration: @Composable () -> Unit)`. Removed `isRtl` logic and all old drawable references. Card is now illustration-agnostic.
+
+### Deleted files (8 PNGs)
+`pdf_to_images.png`, `merge_pdfs.png`, `split_pdf.png`, `images_to_pdf.png` and their `_rtl` variants. All replaced by the composable.
+
+### RTL behavior
+In RTL: Row children appear right-to-left; AutoMirrored arrow points left; PNGs are not flipped. No duplicate assets or duplicate screens needed.
+
+## Theme, Localization & RTL — Implementation Details (2026-07-04)
+
+### Dark Theme Fixes (Color.kt)
+- `PrimaryDark` restored to `0xFF455A64` (same brand color as light mode — buttons no longer change color between themes)
+- `OnPrimaryDark` changed to `0xFFFFFFFF` (white text on dark button for proper contrast)
+- `SurfaceDark` changed to `0xFF2C2C2E` (distinctly lighter than `BackgroundDark 0xFF1C1C1E` — cards now visible)
+- `SurfaceVariantDark` changed to `0xFF3C3C3E`
+
+### Localization
+- Added `res/values-fa/strings.xml` with full Persian translations of all strings
+- Fixed hardcoded `"$totalPages pages"` and `"${entry.pageCount} pages"` in `MergePdfScreen.kt` → now use `R.string.pages_count` + `R.string.meta_separator`
+- Added `meta_separator = " • "` string resource for file info lines
+
+### RTL + Language Switching
+- Added `appcompat 1.7.0` dependency
+- `MainActivity` now extends `AppCompatActivity` (safe — `AppCompatActivity` extends `ComponentActivity`)
+- `SettingsViewModel.setLanguage()` now calls `AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(language.localeTag))` after saving to DataStore. On API 33+: instant, no restart. On API 26–32: Activity recreates automatically.
+- RTL drawable selection in `HomeScreen.kt`: `LocalLayoutDirection.current == LayoutDirection.Rtl` picks `*_rtl` variants; LTR uses originals. No screen duplication.
+- RTL drawables confirmed already correctly named: `pdf_to_images_rtl.png`, `merge_pdfs_rtl.png`, `split_pdf_rtl.png`, `images_to_pdf_rtl.png`
+
+### Key constraint
+Language DataStore stores the preference for the Settings screen display. AppCompatDelegate stores it separately for locale application. Both are cleared together if app data is cleared.
+
+## Settings Screen — Implementation Details
+
+### New files
+- `domain/model/AppTheme.kt` — enum: SYSTEM, LIGHT, DARK
+- `domain/model/AppLanguage.kt` — enum: ENGLISH, PERSIAN (displayName, localeTag)
+- `domain/model/UserPreferences.kt` — data class(theme, language)
+- `domain/repository/SettingsRepository.kt` — interface: preferences Flow, setTheme, setLanguage
+- `data/repository/SettingsRepositoryImpl.kt` — DataStore Preferences, keyed by "settings"
+- `ui/screens/settings/SettingsUiState.kt`
+- `ui/screens/settings/SettingsViewModel.kt` — AndroidViewModel, Activity-scoped
+- `ui/screens/settings/SettingsScreen.kt` — Appearance radios, Language dialog, About section
+
+### Modified files
+- `gradle/libs.versions.toml` + `app/build.gradle.kts` — added DataStore 1.1.7, buildConfig = true
+- `ui/theme/Theme.kt` — `appTheme: AppTheme` param replaces `darkTheme: Boolean`
+- `MainActivity.kt` — creates SettingsViewModel via `by viewModels()`, collects theme, passes SettingsViewModel into NavHost
+- `ui/navigation/NavGraph.kt` — added Settings route, accepts settingsViewModel parameter
+- `ui/screens/home/HomeScreen.kt` — added `onSettingsClick` param, settings icon in top bar
+- `app/src/main/res/values/strings.xml` — added all settings strings
+
+### Key constraint: Language switching deferred
+Language preference is persisted but the app locale does not change at runtime.
+Structure (AppLanguage enum with localeTag) is in place for a future step using AppCompatDelegate.setApplicationLocales().
+
+## Illustration Modular Control (2026-07-05)
+
+### Problem
+Illustrations on the Home screen felt visually inconsistent because assets (PDF vs Images) have different internal padding, and stacks (Merge/Split) have different visual weight than single icons. A "one-size-fits-all" constant was not sufficient for precise visual tuning.
+
+### Fix
+Refactored `FeatureIllustration.kt` into a modular system that exposes manual control over every single icon in every card.
+
+Shared private variables in `IllustrationDefaults`:
+- **Card 1 (PDF to Images)**: `Card1_PdfSize`, `Card1_ImagesSize`
+- **Card 2 (Merge PDFs)**: `Card2_PdfStackSize` (inner icons), `Card2_TargetPdfSize`
+- **Card 3 (Split PDF)**: `Card3_SourcePdfSize`, `Card3_PdfStackSize` (inner icons)
+- **Card 4 (Images to PDF)**: `Card4_ImagesSize`, `Card4_PdfSize`
+- **Global**: `GlobalPdfScale`, `GlobalImagesScale` (for padding compensation)
+- **Shared**: `StackOffset`, `ArrowSize`, `SpacingGap`
+
+### Benefit
+The user (developer) can now tune any specific icon in any specific card without affecting others. The architecture remains modular, using a single `IllustrationLayout` and reusable building blocks (`PdfIcon`, `ImagesIcon`, `PdfStack`), but with granular parameterization.
+
+### Modified files
+- `ui/components/FeatureIllustration.kt` only
+
+---
+
 ## Next Expected Step
 
-1. Test Image to PDF on device — add images, create PDF, verify in Documents/EasySmartPDF/.
-2. Test auto-orientation — add 1 landscape image, verify orientation auto-sets to Landscape.
-3. Test drag-to-reorder in image list.
-4. Test Cancel during creation.
-5. Test Split PDF on device.
-6. Fix NavGraph openMergedFile() path if still needed.
-7. Resolve open decisions (data source layer, use case location, Hilt, API 26-28 storage).
+1. Create the release keystore using the keytool command above.
+2. Populate `keystore.properties` from the template.
+3. Run `./gradlew assembleRelease` and verify the APK is signed and not too large.
+4. Replace launcher icon foreground with custom branded art (requires a designer).
+5. Add a privacy policy URL (required by Google Play for apps that access storage).
+6. Test Image to PDF on device — add images, create PDF, verify in Documents/EasySmartPDF/.
+7. Fix NavGraph openMergedFile() path if still needed.
+8. Resolve open decisions (data source layer, use case location, Hilt, API 26-28 storage).
+9. Wire language switching using AppCompatDelegate.setApplicationLocales() (API 33+) or manual locale override (API 26–32).
 
 Stop after each step. Wait for review.

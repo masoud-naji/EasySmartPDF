@@ -26,6 +26,8 @@ import com.masoudnaji.easysmartpdf.ui.screens.merge.MergeProgressScreen
 import com.masoudnaji.easysmartpdf.ui.screens.merge.MergeSuccessScreen
 import com.masoudnaji.easysmartpdf.ui.screens.pdftoimage.CreatePicturesScreen
 import com.masoudnaji.easysmartpdf.ui.screens.progress.ProgressScreen
+import com.masoudnaji.easysmartpdf.ui.screens.settings.SettingsScreen
+import com.masoudnaji.easysmartpdf.ui.screens.settings.SettingsViewModel
 import com.masoudnaji.easysmartpdf.ui.screens.split.SplitPdfScreen
 import com.masoudnaji.easysmartpdf.ui.screens.split.SplitProgressScreen
 import com.masoudnaji.easysmartpdf.ui.screens.split.SplitSuccessScreen
@@ -33,6 +35,7 @@ import com.masoudnaji.easysmartpdf.ui.screens.success.SuccessScreen
 
 object Screen {
     const val Home = "home"
+    const val Settings = "settings"
     const val CreatePictures = "create_pictures"
     const val Progress = "progress"
     const val SuccessRoute = "success/{savedCount}/{folderName}"
@@ -62,6 +65,7 @@ object Screen {
 @Composable
 fun EasySmartNavHost(
     navController: NavHostController,
+    settingsViewModel: SettingsViewModel,
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -74,7 +78,15 @@ fun EasySmartNavHost(
                 onCreatePicturesClick = { navController.navigate(Screen.CreatePictures) },
                 onMergePdfClick = { navController.navigate(Screen.MergePdf) },
                 onSplitPdfClick = { navController.navigate(Screen.SplitPdf) },
-                onImageToPdfClick = { navController.navigate(Screen.ImageToPdf) }
+                onImageToPdfClick = { navController.navigate(Screen.ImageToPdf) },
+                onSettingsClick = { navController.navigate(Screen.Settings) }
+            )
+        }
+
+        composable(Screen.Settings) {
+            SettingsScreen(
+                viewModel = settingsViewModel,
+                onBackClick = { navController.popBackStack() }
             )
         }
 

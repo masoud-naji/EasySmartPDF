@@ -3,15 +3,27 @@
 
     <!-- Home Screen -->
     <string name="home_title">EasySmartPDF</string>
-    <string name="feature_create_pictures">Create Pictures</string>
-    <string name="feature_create_pictures_desc">Turn your PDF into pictures.</string>
-    <string name="feature_merge_pdf">Merge PDFs</string>
-    <string name="feature_split_pdf">Split PDF</string>
-    <string name="feature_image_to_pdf">Image to PDF</string>
+    <string name="feature_pdf_to_images_title">PDF ▶ Images</string>
+    <string name="feature_pdf_to_images_desc">Convert every page of a PDF into images.</string>
+    <string name="feature_pdf_to_images_action">Convert</string>
+
+    <string name="feature_merge_pdfs_title">Merge PDFs</string>
+    <string name="feature_merge_pdfs_desc">Combine multiple PDFs into one file.</string>
+    <string name="feature_merge_pdfs_action">Merge</string>
+
+    <string name="feature_split_pdf_title">Split PDF</string>
+    <string name="feature_split_pdf_desc">Extract pages or split a PDF into separate files.</string>
+    <string name="feature_split_pdf_action">Split</string>
+
+    <string name="feature_images_to_pdf_title">Images ▶ PDF</string>
+    <string name="feature_images_to_pdf_desc">Turn your images into a single PDF.</string>
+    <string name="feature_images_to_pdf_action">Create</string>
+
     <string name="coming_soon">Coming Soon</string>
 
     <!-- Create Pictures Screen -->
     <string name="create_pictures_title">Create Pictures</string>
+    <string name="feature_create_pictures">Create Pictures</string>
     <string name="pdf_file_card_title">PDF File</string>
     <string name="no_pdf_chosen_yet">No PDF chosen yet</string>
     <string name="choose_pdf">Choose PDF</string>
@@ -87,7 +99,6 @@
     <string name="split_success_files_count">%1$d PDF files created</string>
     <string name="split_success_folder">Saved in %1$s</string>
     <string name="split_success_single_location">Saved in Documents/EasySmartPDF/Split</string>
-    <string name="feature_split_pdf_desc">Split a PDF into separate files.</string>
 
     <!-- Image to PDF Screen -->
     <string name="feature_image_to_pdf_desc">Turn your images into a PDF.</string>
@@ -132,4 +143,23 @@
     <string name="discard_dialog_message">Your selected PDF and settings will be lost.</string>
     <string name="keep_editing">Keep Editing</string>
     <string name="discard">Discard</string>
+
+    <!-- Metadata separator used in file info lines (e.g. "5 pages • 2.3 MB") -->
+    <string name="meta_separator"> • </string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_back">Back</string>
+    <string name="settings_appearance_title">Appearance</string>
+    <string name="settings_theme_system">System default</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_language_title">Language</string>
+    <string name="settings_language_label">Language</string>
+    <string name="settings_language_dialog_title">Choose Language</string>
+    <string name="settings_about_title">About</string>
+    <string name="settings_about_app_name">App</string>
+    <string name="settings_about_version">Version</string>
+    <string name="settings_about_privacy_policy">Privacy Policy</string>
+    <string name="settings_about_coming_soon">Coming soon</string>
 </resources>

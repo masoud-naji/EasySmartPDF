@@ -152,9 +152,10 @@ fun MergePdfScreen(
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface
                     )
+                    val separator = stringResource(R.string.meta_separator)
                     val summaryMeta = buildString {
-                        if (totalPages > 0) append("$totalPages pages")
-                        if (totalPages > 0 && totalSize > 0) append(" • ")
+                        if (totalPages > 0) append(context.getString(R.string.pages_count, totalPages))
+                        if (totalPages > 0 && totalSize > 0) append(separator)
                         if (totalSize > 0) append(Formatter.formatShortFileSize(context, totalSize))
                     }
                     if (summaryMeta.isNotEmpty()) {
@@ -260,9 +261,10 @@ private fun PdfListItem(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val separator = stringResource(R.string.meta_separator)
     val metaLine = buildString {
-        if (entry.pageCount > 0) append("${entry.pageCount} pages")
-        if (entry.pageCount > 0 && entry.fileSize > 0) append(" • ")
+        if (entry.pageCount > 0) append(context.getString(R.string.pages_count, entry.pageCount))
+        if (entry.pageCount > 0 && entry.fileSize > 0) append(separator)
         if (entry.fileSize > 0) append(Formatter.formatShortFileSize(context, entry.fileSize))
     }
 

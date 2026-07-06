@@ -6,35 +6,44 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
 import com.masoudnaji.easysmartpdf.ui.theme.ButtonDimens
 import com.masoudnaji.easysmartpdf.ui.theme.Radius
 
 /**
  * Primary Button for EasySmartPDF.
- * Height: 64dp, Rounded corners, Full width by default.
+ * Height: 64dp (default), Rounded corners, Full width by default.
  */
 @Composable
 fun PrimaryButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    fillMaxWidth: Boolean = true,
+    textStyle: TextStyle = MaterialTheme.typography.labelLarge,
+    height: Dp = ButtonDimens.Height
 ) {
     Button(
         onClick = onClick,
         modifier = modifier
-            .fillMaxWidth()
-            .height(ButtonDimens.Height),
+            .then(if (fillMaxWidth) Modifier.fillMaxWidth() else Modifier)
+            .height(height),
         shape = RoundedCornerShape(Radius.md),
         enabled = enabled,
         elevation = ButtonDefaults.buttonElevation()
     ) {
-        Text(text = text)
+        Text(
+            text = text,
+            style = textStyle
+        )
     }
 }
 

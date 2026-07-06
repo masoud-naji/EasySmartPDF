@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">EasySmartPDF</string>
+
+    <!-- Home Screen -->
+    <string name="home_title">EasySmartPDF</string>
+    <string name="feature_pdf_to_images_title">PDF ▶ تصویر</string>
+    <string name="feature_pdf_to_images_desc">هر صفحه PDF را به تصویر تبدیل کنید.</string>
+    <string name="feature_pdf_to_images_action">تبدیل</string>
+
+    <string name="feature_merge_pdfs_title">ادغام PDF</string>
+    <string name="feature_merge_pdfs_desc">چند PDF را در یک فایل ترکیب کنید.</string>
+    <string name="feature_merge_pdfs_action">ادغام</string>
+
+    <string name="feature_split_pdf_title">تقسیم PDF</string>
+    <string name="feature_split_pdf_desc">صفحات را استخراج یا PDF را تقسیم کنید.</string>
+    <string name="feature_split_pdf_action">تقسیم</string>
+
+    <string name="feature_images_to_pdf_title">تصویر ▶ PDF</string>
+    <string name="feature_images_to_pdf_desc">تصاویر را به یک PDF تبدیل کنید.</string>
+    <string name="feature_images_to_pdf_action">ساخت</string>
+
+    <string name="coming_soon">به‌زودی</string>
+
+    <!-- Create Pictures Screen -->
+    <string name="create_pictures_title">ساخت تصویر</string>
+    <string name="feature_create_pictures">ساخت تصویر</string>
+    <string name="pdf_file_card_title">فایل PDF</string>
+    <string name="no_pdf_chosen_yet">هنوز PDF انتخاب نشده</string>
+    <string name="choose_pdf">انتخاب PDF</string>
+    <string name="change_pdf">تغییر PDF</string>
+    <string name="picture_size_card_title">کیفیت تصویر</string>
+    <string name="size_smaller">فایل کوچک‌تر</string>
+    <string name="size_balanced">متوازن (پیشنهادی)</string>
+    <string name="size_best">بهترین کیفیت</string>
+    <string name="pages_card_title">صفحات</string>
+    <string name="all_pages">همه صفحات</string>
+    <string name="page_range">محدوده صفحه</string>
+    <string name="from_page">از</string>
+    <string name="to_page">تا</string>
+    <string name="pages_available">%1$d صفحه موجود</string>
+    <string name="error_open_pdf">این PDF قابل باز شدن نیست.</string>
+    <string name="pages_count">%1$d صفحه</string>
+    <string name="ready_status">آماده ✓</string>
+
+    <!-- Progress Screen -->
+    <string name="progress_title">در حال ساخت تصویر</string>
+    <string name="progress_page_of">صفحه %1$d از %2$d</string>
+    <string name="progress_saving_image">ذخیره تصویر %1$d…</string>
+    <string name="progress_starting">در حال آماده‌سازی…</string>
+
+    <!-- Success Screen -->
+    <string name="success_title">انجام شد!</string>
+    <string name="success_pictures_count">%1$d تصویر ذخیره شد</string>
+    <string name="success_folder">ذخیره در %1$s</string>
+    <string name="open_folder">باز کردن پوشه</string>
+    <string name="back_to_home">بازگشت به خانه</string>
+
+    <!-- Cancel Dialog -->
+    <string name="cancel_dialog_title">ساخت تصاویر متوقف شود؟</string>
+    <string name="cancel_dialog_message">تصاویر ذخیره‌شده باقی می‌مانند.</string>
+    <string name="action_continue">ادامه</string>
+    <string name="action_stop">توقف</string>
+    <string name="cancel">لغو</string>
+
+    <!-- Merge PDF Screen -->
+    <string name="merge_pdf_title">ادغام PDF</string>
+    <string name="merge_files_card_title">فایل‌های PDF</string>
+    <string name="merge_no_files_yet">هنوز PDF اضافه نشده.</string>
+    <string name="merge_add_pdf">افزودن PDF</string>
+    <string name="merge_add_more_pdf">افزودن PDF بیشتر</string>
+    <string name="merge_action">ادغام</string>
+    <string name="merge_loading_details">در حال بارگذاری…</string>
+    <string name="merge_need_two_files">حداقل ۲ PDF برای ادغام اضافه کنید.</string>
+    <string name="merge_remove_file">حذف</string>
+    <string name="merge_drag_handle">برای مرتب‌سازی بکشید</string>
+    <string name="merge_file_number">فایل %1$d از %2$d</string>
+    <string name="merge_cancel_dialog_title">ادغام متوقف شود؟</string>
+    <string name="merge_progress_page_of">صفحه %1$d از %2$d</string>
+    <string name="merge_progress_merging">در حال ادغام صفحه %1$d…</string>
+    <string name="merge_success_message">PDF‌های شما ادغام شدند.</string>
+    <string name="merge_open_file">باز کردن فایل</string>
+    <string name="feature_merge_pdf_desc">چند PDF را در یکی ترکیب کنید.</string>
+
+    <!-- Merge PDF summary -->
+    <plurals name="merge_summary_count">
+        <item quantity="one">%d PDF انتخاب شده</item>
+        <item quantity="other">%d PDF انتخاب شده</item>
+    </plurals>
+
+    <!-- Split PDF Screen -->
+    <string name="split_pdf_title">تقسیم PDF</string>
+    <string name="split_pages_card_title">صفحات برای تقسیم</string>
+    <string name="split_action">تقسیم PDF</string>
+    <string name="split_cancel_dialog_title">تقسیم متوقف شود؟</string>
+    <string name="split_progress_page_of">تقسیم صفحه %1$d از %2$d</string>
+    <string name="split_output_card_title">خروجی</string>
+    <string name="split_output_single_pdf">یک PDF</string>
+    <string name="split_output_separate_pdfs">PDF‌های جداگانه</string>
+    <string name="split_success_files_count">%1$d فایل PDF ایجاد شد</string>
+    <string name="split_success_folder">ذخیره در %1$s</string>
+    <string name="split_success_single_location">ذخیره در Documents/EasySmartPDF/Split</string>
+
+    <!-- Image to PDF Screen -->
+    <string name="feature_image_to_pdf_desc">تصاویر را به PDF تبدیل کنید.</string>
+    <string name="image_to_pdf_title">تصویر به PDF</string>
+    <string name="image_to_pdf_images_card_title">تصاویر</string>
+    <string name="image_to_pdf_no_images_yet">هنوز تصویری اضافه نشده.</string>
+    <string name="image_to_pdf_add_images">افزودن تصویر</string>
+    <string name="image_to_pdf_add_more_images">افزودن تصاویر بیشتر</string>
+    <string name="image_to_pdf_loading_details">در حال بارگذاری…</string>
+    <string name="image_to_pdf_options_card_title">تنظیمات PDF</string>
+    <string name="image_to_pdf_page_size_label">اندازه صفحه</string>
+    <string name="image_to_pdf_a4">A4</string>
+    <string name="image_to_pdf_letter">Letter</string>
+    <string name="image_to_pdf_orientation_label">جهت</string>
+    <string name="image_to_pdf_portrait">عمودی</string>
+    <string name="image_to_pdf_landscape">افقی</string>
+    <string name="image_to_pdf_margins_label">حاشیه</string>
+    <string name="image_to_pdf_margin_none">بدون حاشیه</string>
+    <string name="image_to_pdf_margin_small">کوچک</string>
+    <string name="image_to_pdf_margin_medium">متوسط</string>
+    <string name="image_to_pdf_quality_label">کیفیت</string>
+    <string name="image_to_pdf_quality_original">اصلی (بزرگ‌ترین فایل)</string>
+    <string name="image_to_pdf_quality_high">بالا (پیشنهادی)</string>
+    <string name="image_to_pdf_quality_medium">متوسط (کوچک‌ترین فایل)</string>
+    <string name="image_to_pdf_fit_mode_label">نحوه قرارگیری</string>
+    <string name="image_to_pdf_fit_to_page">متناسب با صفحه</string>
+    <string name="image_to_pdf_crop_to_fill">برش و پر کردن</string>
+    <string name="image_to_pdf_action">ساخت PDF</string>
+    <string name="image_to_pdf_progress_creating">در حال ساخت صفحه %1$d از %2$d…</string>
+    <string name="image_to_pdf_cancel_dialog_title">ساخت PDF متوقف شود؟</string>
+    <string name="image_to_pdf_success_message">PDF شما ایجاد شد.</string>
+    <string name="image_to_pdf_open_file">باز کردن فایل</string>
+
+    <!-- Image to PDF summary -->
+    <plurals name="image_to_pdf_summary_count">
+        <item quantity="one">%d تصویر انتخاب شده</item>
+        <item quantity="other">%d تصویر انتخاب شده</item>
+    </plurals>
+
+    <!-- Discard Changes Dialog -->
+    <string name="discard_dialog_title">تغییرات حذف شوند؟</string>
+    <string name="discard_dialog_message">PDF انتخابی و تنظیمات از دست می‌رود.</string>
+    <string name="keep_editing">ادامه ویرایش</string>
+    <string name="discard">حذف</string>
+
+    <!-- Metadata separator -->
+    <string name="meta_separator"> • </string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">تنظیمات</string>
+    <string name="settings_back">بازگشت</string>
+    <string name="settings_appearance_title">ظاهر</string>
+    <string name="settings_theme_system">پیش‌فرض سیستم</string>
+    <string name="settings_theme_light">روشن</string>
+    <string name="settings_theme_dark">تاریک</string>
+    <string name="settings_language_title">زبان</string>
+    <string name="settings_language_label">زبان</string>
+    <string name="settings_language_dialog_title">انتخاب زبان</string>
+    <string name="settings_about_title">درباره</string>
+    <string name="settings_about_app_name">برنامه</string>
+    <string name="settings_about_version">نسخه</string>
+    <string name="settings_about_privacy_policy">حریم خصوصی</string>
+    <string name="settings_about_coming_soon">به‌زودی</string>
+</resources>

@@ -18,13 +18,13 @@ val SurfaceLight = Color(0xFFFFFFFF)
 val OnSurfaceLight = Color(0xFF263238)
 val SurfaceVariantLight = Color(0xFFCFD8DC)
 
-// Dark Palette
-val PrimaryDark = Color(0xFFCFD8DC)
-val OnPrimaryDark = Color(0xFF263238)
+// Dark Palette — brand color preserved, surface distinct from background
+val PrimaryDark = Color(0xFF455A64)      // Same brand color as light mode
+val OnPrimaryDark = Color(0xFFFFFFFF)    // White text on brand button
 val PrimaryContainerDark = Color(0xFF37474F)
 val OnPrimaryContainerDark = Color(0xFFECEFF1)
 
 val BackgroundDark = Color(0xFF1C1C1E)
-val SurfaceDark = Color(0xFF1C1C1E)
+val SurfaceDark = Color(0xFF2C2C2E)      // Visibly elevated above background
 val OnSurfaceDark = Color(0xFFE1E1E1)
-val SurfaceVariantDark = Color(0xFF455A64)
+val SurfaceVariantDark = Color(0xFF3C3C3E)
