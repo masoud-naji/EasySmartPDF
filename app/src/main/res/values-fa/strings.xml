@@ -70,6 +70,7 @@
     <string name="merge_add_pdf">افزودن PDF</string>
     <string name="merge_add_more_pdf">افزودن PDF بیشتر</string>
     <string name="merge_action">ادغام</string>
+    <string name="merge_arrange_pages">مرتب‌سازی صفحات</string>
     <string name="merge_loading_details">در حال بارگذاری…</string>
     <string name="merge_need_two_files">حداقل ۲ PDF برای ادغام اضافه کنید.</string>
     <string name="merge_remove_file">حذف</string>
@@ -165,4 +166,19 @@
     <string name="settings_about_support">پشتیبانی</string>
     <string name="settings_about_support_email">support@poonel.app</string>
     <string name="logo_content_description">لوگوی پونل</string>
+
+    <!-- Page Editor -->
+    <string name="page_editor_title">مرتب‌سازی صفحات</string>
+    <string name="page_editor_loading_progress">بارگذاری %1$d از %2$d…</string>
+    <string name="page_editor_rotate_left">چرخش به چپ</string>
+    <string name="page_editor_rotate_right">چرخش به راست</string>
+    <string name="page_editor_delete_page">حذف صفحه</string>
+    <string name="page_editor_close_preview">بستن پیش‌نمایش</string>
+    <string name="page_editor_page_of">صفحه %1$d از %2$d</string>
+    <string name="page_editor_thumbnail_error">بارگذاری ناموفق</string>
+
+    <plurals name="page_editor_merge_action">
+        <item quantity="one">ادغام %d صفحه</item>
+        <item quantity="other">ادغام %d صفحه</item>
+    </plurals>
 </resources>

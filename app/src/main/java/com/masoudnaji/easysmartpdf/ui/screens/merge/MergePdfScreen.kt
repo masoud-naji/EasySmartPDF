@@ -61,7 +61,7 @@ import com.masoudnaji.easysmartpdf.ui.theme.Spacing
 @Composable
 fun MergePdfScreen(
     onBackClick: () -> Unit,
-    onNavigateToProgress: () -> Unit,
+    onNavigateToPageEditor: () -> Unit,
     viewModel: MergePdfViewModel = viewModel(),
     modifier: Modifier = Modifier
 ) {
@@ -112,11 +112,8 @@ fun MergePdfScreen(
                     .padding(Spacing.lg)
             ) {
                 PrimaryButton(
-                    text = stringResource(R.string.merge_action),
-                    onClick = {
-                        viewModel.startMerge()
-                        onNavigateToProgress()
-                    },
+                    text = stringResource(R.string.merge_arrange_pages),
+                    onClick = onNavigateToPageEditor,
                     enabled = uiState.pdfList.size >= 2
                 )
             }

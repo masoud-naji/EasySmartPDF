@@ -70,6 +70,7 @@
     <string name="merge_add_pdf">Add PDF</string>
     <string name="merge_add_more_pdf">Add More PDFs</string>
     <string name="merge_action">Merge</string>
+    <string name="merge_arrange_pages">Arrange Pages</string>
     <string name="merge_loading_details">Loading details…</string>
     <string name="merge_need_two_files">Add at least 2 PDFs to merge.</string>
     <string name="merge_remove_file">Remove</string>
@@ -165,4 +166,19 @@
     <string name="settings_about_support">Support</string>
     <string name="settings_about_support_email">support@poonel.app</string>
     <string name="logo_content_description">Poonel Logo</string>
+
+    <!-- Page Editor -->
+    <string name="page_editor_title">Arrange Pages</string>
+    <string name="page_editor_loading_progress">Loading %1$d of %2$d…</string>
+    <string name="page_editor_rotate_left">Rotate left</string>
+    <string name="page_editor_rotate_right">Rotate right</string>
+    <string name="page_editor_delete_page">Remove page</string>
+    <string name="page_editor_close_preview">Close preview</string>
+    <string name="page_editor_page_of">Page %1$d of %2$d</string>
+    <string name="page_editor_thumbnail_error">Could not load</string>
+
+    <plurals name="page_editor_merge_action">
+        <item quantity="one">Merge %d Page</item>
+        <item quantity="other">Merge %d Pages</item>
+    </plurals>
 </resources>

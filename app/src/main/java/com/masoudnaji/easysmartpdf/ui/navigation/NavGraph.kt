@@ -24,6 +24,7 @@ import com.masoudnaji.easysmartpdf.ui.screens.home.HomeScreen
 import com.masoudnaji.easysmartpdf.ui.screens.imagetopdf.ImageToPdfProgressScreen
 import com.masoudnaji.easysmartpdf.ui.screens.imagetopdf.ImageToPdfScreen
 import com.masoudnaji.easysmartpdf.ui.screens.imagetopdf.ImageToPdfSuccessScreen
+import com.masoudnaji.easysmartpdf.ui.screens.merge.MergePageEditorScreen
 import com.masoudnaji.easysmartpdf.ui.screens.merge.MergePdfScreen
 import com.masoudnaji.easysmartpdf.ui.screens.merge.MergeProgressScreen
 import com.masoudnaji.easysmartpdf.ui.screens.merge.MergeSuccessScreen
@@ -43,6 +44,7 @@ object Screen {
     const val Progress = "progress"
     const val SuccessRoute = "success/{savedCount}/{folderName}"
     const val MergePdf = "merge_pdf"
+    const val MergePageEditor = "merge_page_editor"
     const val MergeProgress = "merge_progress"
     const val MergeSuccessRoute = "merge_success/{fileName}"
     const val SplitPdf = "split_pdf"
@@ -142,6 +144,17 @@ fun PoonelNavHost(
             // Merge PDF flow
             composable(Screen.MergePdf) {
                 MergePdfScreen(
+                    onBackClick = { navController.popBackStack() },
+                    onNavigateToPageEditor = { navController.navigate(Screen.MergePageEditor) }
+                )
+            }
+
+            composable(Screen.MergePageEditor) { backStackEntry ->
+                val mergePdfEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(Screen.MergePdf)
+                }
+                MergePageEditorScreen(
+                    mergePdfEntry = mergePdfEntry,
                     onBackClick = { navController.popBackStack() },
                     onNavigateToProgress = { navController.navigate(Screen.MergeProgress) }
                 )

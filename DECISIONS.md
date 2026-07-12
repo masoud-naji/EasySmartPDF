@@ -89,3 +89,43 @@ Use a vertical "circuit-like" honeycomb network with vertex nodes (dots).
 Matches the specific professional, engineered look requested for the Poonel brand.
 ### Status
 Accepted
+
+---
+
+## 2026-07-11 (Page Editor Architecture)
+### Decision
+Introduce a reusable Page Editor as a middle step inside the Merge PDF flow, operating at the page level rather than the file level.
+### Reason
+Users need to reorder, rotate, and delete individual pages before merging. The same editor will be reused by Split PDF, Images to PDF, and future editing features. Putting it inside Merge first allows the design to be validated before broader reuse.
+### Status
+Accepted
+
+---
+
+## 2026-07-11 (MergeConfig Breaking Change)
+### Decision
+Replace `MergeConfig.pdfUris: List<Uri>` with `MergeConfig.pages: List<PageItem>`.
+### Reason
+The merge pipeline now needs per-page instructions (source file, page index, rotation). File-level URIs cannot carry this information.
+### Status
+Accepted
+
+---
+
+## 2026-07-11 (Rotate is Not a Standalone Tool)
+### Decision
+Rotate is NOT a home screen feature. It is only available inside the Page Editor.
+### Reason
+Prevents feature creep. Rotate without context (which pages? in what order?) is rarely useful alone. The Page Editor provides the correct context.
+### Status
+Accepted
+
+---
+
+## 2026-07-11 (Shared ViewModel via Back Stack Entry)
+### Decision
+MergePdfViewModel is shared between MergePdfScreen and MergePageEditorScreen by resolving it from the MergePdf back stack entry.
+### Reason
+The file-selection state and page-editor state belong to the same user session. Sharing one ViewModel avoids inter-ViewModel communication complexity. Standard Compose Navigation pattern — no new infrastructure needed.
+### Status
+Accepted
