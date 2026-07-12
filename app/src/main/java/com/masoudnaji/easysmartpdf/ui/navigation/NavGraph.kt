@@ -34,6 +34,8 @@ import com.masoudnaji.easysmartpdf.ui.screens.merge.MergePdfScreen
 import com.masoudnaji.easysmartpdf.ui.screens.merge.MergePdfViewModel
 import com.masoudnaji.easysmartpdf.ui.screens.merge.MergeProgressScreen
 import com.masoudnaji.easysmartpdf.ui.screens.merge.MergeSuccessScreen
+import com.masoudnaji.easysmartpdf.ui.screens.pageeditor.PageEditorScreen
+import com.masoudnaji.easysmartpdf.ui.screens.pageeditor.PageEditorViewModel
 import com.masoudnaji.easysmartpdf.ui.screens.pageorganizer.PageOrganizerScreen
 import com.masoudnaji.easysmartpdf.ui.screens.pdftoimage.CreatePicturesScreen
 import com.masoudnaji.easysmartpdf.ui.screens.progress.ProgressScreen
@@ -52,6 +54,7 @@ object Screen {
     const val SuccessRoute = "success/{savedCount}/{folderName}"
     const val MergePdf = "merge_pdf"
     const val PageOrganizer = "page_organizer"
+    const val PageEditorRoute = "page_editor/{pageIndex}"
     const val MergeProgress = "merge_progress"
     const val MergeSuccessRoute = "merge_success/{fileName}"
     const val SplitPdf = "split_pdf"
@@ -72,6 +75,8 @@ object Screen {
 
     fun imageToPdfSuccessDestination(fileName: String) =
         "image_to_pdf_success/${Uri.encode(fileName)}"
+
+    fun pageEditorDestination(pageIndex: Int) = "page_editor/$pageIndex"
 }
 
 @Composable
@@ -179,12 +184,46 @@ fun PoonelNavHost(
                     onRotateRight = { pageId -> vm.rotatePage(pageId, clockwise = true) },
                     onDelete = vm::deletePage,
                     onMove = vm::movePage,
-                    onPageClick = vm::setZoomedPage,
+                    onPageClick = { pageId ->
+                        val idx = state.pages.indexOfFirst { it.id == pageId }
+                        if (idx >= 0) navController.navigate(Screen.pageEditorDestination(idx))
+                    },
+                    onLongPressPage = vm::setZoomedPage,
                     onZoomDismiss = { vm.setZoomedPage(null) },
                     onErrorShown = vm::onErrorDismissed,
                     onConfirm = {
                         vm.startMerge()
                         navController.navigate(Screen.MergeProgress)
+                    }
+                )
+            }
+
+            composable(
+                route = Screen.PageEditorRoute,
+                arguments = listOf(navArgument("pageIndex") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val pageIndex = backStackEntry.arguments?.getInt("pageIndex") ?: -1
+                val mergeEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(Screen.MergePdf)
+                }
+                val mergeVM: MergePdfViewModel = viewModel(mergeEntry)
+                val editorVM: PageEditorViewModel = viewModel()
+                val editorState by editorVM.uiState.collectAsState()
+
+                androidx.compose.runtime.LaunchedEffect(pageIndex) {
+                    val page = mergeVM.uiState.value.pages.getOrNull(pageIndex)
+                    if (page != null) editorVM.loadPage(page)
+                }
+
+                PageEditorScreen(
+                    page = editorState.page,
+                    onRotateLeft = editorVM::rotateLeft,
+                    onRotateRight = editorVM::rotateRight,
+                    onFineRotate = editorVM::setFineRotation,
+                    onBackClick = { navController.popBackStack() },
+                    onApply = {
+                        editorVM.getUpdatedPage()?.let { mergeVM.updatePage(it) }
+                        navController.popBackStack()
                     }
                 )
             }

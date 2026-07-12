@@ -157,3 +157,22 @@ The screen has no feature-specific code — all wiring (ViewModel, callbacks, CT
 - Merge PDF behavior is 100% unchanged.
 ### Status
 Accepted
+
+---
+
+## 2026-07-12 (Phase 2: PageEditorScreen + fine rotation)
+### Decision
+Create `PageEditorScreen` + `PageEditorViewModel` for per-page fine editing. Single tap on a thumbnail opens the page editor; long press opens zoom preview.
+### Reason
+Users need to fine-tune individual page rotation (±45°) in addition to 90° snapping. Separating single-page editing from page organization keeps concerns clean: `PageOrganizerScreen` handles ordering/bulk ops, `PageEditorScreen` handles per-page detail edits.
+### Implementation
+- `PageItem` gains `fineRotation: Float = 0f` — the ±45° fine-rotation offset on top of the integer 90° snap.
+- `PageOperationsDelegate` gains `updatePage(PageItem)` — replaces a page in the list by ID, preserving order.
+- `MergePdfViewModel` exposes `updatePage()` as a pass-through to the delegate.
+- `PageEditorViewModel` is a plain `ViewModel` (no `Application` dependency). Holds a copy of the page being edited. `loadPage()` is idempotent (only sets if page is null) to prevent overwriting edits on recomposition.
+- `PageEditorScreen` is a pure composable: page preview with combined rotation, 90° rotate buttons, fine-rotation slider (–45 to +45°). No ViewModel or navigation imports.
+- NavGraph wiring: `page_organizer` `onPageClick` now navigates to `page_editor/{pageIndex}`; `onLongPressPage` triggers zoom preview. `page_editor` entry resolves `MergePdfViewModel` from the `merge_pdf` back stack, creates its own `PageEditorViewModel`, and calls `mergeVM.updatePage()` on Apply before popping.
+- `MergeRepositoryImpl` applies `totalRotation = baseRotation + fineRotation` in the matrix; `swapDims` is still determined by the 90° base only.
+- `PageThumbnailCard` updated: `combinedClickable` (tap = open editor, long press = zoom); rotation preview shows `rotation + fineRotation`.
+### Status
+Accepted

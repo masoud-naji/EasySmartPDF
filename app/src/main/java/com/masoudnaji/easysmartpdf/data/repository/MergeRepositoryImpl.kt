@@ -61,8 +61,10 @@ class MergeRepositoryImpl(private val context: Context) : MergeRepository {
                                 "Page $srcIdx in $uri has invalid dimensions ${srcW}×${srcH}"
                             }
 
-                            val rotation = pageItem.rotation.normalizeRotation()
-                            val swapDims = rotation == 90 || rotation == 270
+                            val baseRotation = pageItem.rotation.normalizeRotation()
+                            val fineRotation = pageItem.fineRotation
+                            val totalRotation = baseRotation.toFloat() + fineRotation
+                            val swapDims = baseRotation == 90 || baseRotation == 270
                             val outW = if (swapDims) srcH else srcW
                             val outH = if (swapDims) srcW else srcH
 
@@ -74,9 +76,9 @@ class MergeRepositoryImpl(private val context: Context) : MergeRepository {
                             val pdfPage = document.startPage(pageInfo)
                             val canvas = pdfPage.canvas
 
-                            if (rotation != 0) {
+                            if (totalRotation != 0f) {
                                 val matrix = Matrix()
-                                matrix.postRotate(rotation.toFloat(), srcW / 2f, srcH / 2f)
+                                matrix.postRotate(totalRotation, srcW / 2f, srcH / 2f)
                                 if (swapDims) {
                                     matrix.postTranslate(
                                         (outW - srcW) / 2f,
@@ -93,7 +95,7 @@ class MergeRepositoryImpl(private val context: Context) : MergeRepository {
                         }
 
                         processed++
-                        Log.d(TAG, "  Wrote page $processed/$total (src=$srcIdx, rot=${pageItem.rotation}°)")
+                        Log.d(TAG, "  Wrote page $processed/$total (src=$srcIdx, rot=${pageItem.rotation}°, fine=${pageItem.fineRotation}°)")
                         emit(MergeEvent.Progress(current = processed, total = total))
                     }
                 }

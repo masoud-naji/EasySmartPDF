@@ -46,6 +46,7 @@ fun PageOrganizerScreen(
     onDelete: (pageId: String) -> Unit,
     onMove: (from: Int, to: Int) -> Unit,
     onPageClick: (pageId: String) -> Unit,
+    onLongPressPage: (pageId: String) -> Unit,
     onZoomDismiss: () -> Unit,
     onErrorShown: () -> Unit,
     onConfirm: () -> Unit,
@@ -132,6 +133,7 @@ fun PageOrganizerScreen(
             onRotateRight = onRotateRight,
             onDelete = onDelete,
             onPageClick = onPageClick,
+            onLongClick = onLongPressPage,
             onMove = onMove,
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(

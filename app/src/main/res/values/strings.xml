@@ -181,4 +181,9 @@
         <item quantity="one">Merge %d Page</item>
         <item quantity="other">Merge %d Pages</item>
     </plurals>
+
+    <!-- Single Page Editor -->
+    <string name="single_page_editor_title">Edit Page</string>
+    <string name="single_page_editor_apply">Apply</string>
+    <string name="single_page_editor_fine_rotation">Fine rotation: %1$.1f°</string>
 </resources>

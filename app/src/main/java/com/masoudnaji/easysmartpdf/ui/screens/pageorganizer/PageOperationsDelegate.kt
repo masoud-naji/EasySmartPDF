@@ -72,6 +72,16 @@ class PageOperationsDelegate(
         _state.update { it.copy(zoomedPageId = pageId) }
     }
 
+    fun updatePage(updated: PageItem) {
+        _state.update { state ->
+            val idx = state.pages.indexOfFirst { it.id == updated.id }
+            if (idx == -1) return@update state
+            val pages = state.pages.toMutableList()
+            pages[idx] = updated
+            state.copy(pages = pages)
+        }
+    }
+
     fun clear() {
         thumbnailJob?.cancel()
         thumbnailJob = null

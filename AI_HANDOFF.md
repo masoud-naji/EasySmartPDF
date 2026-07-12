@@ -110,8 +110,24 @@ Deleted files:
 Changed files:
 - `ui/navigation/NavGraph.kt` — `Screen.MergePageEditor` → `Screen.PageOrganizer`; NavGraph entry now resolves `MergePdfViewModel` and passes all state + lambdas to `PageOrganizerScreen`
 
-### Phase 2 — PENDING
-Create `PageEditorScreen` + `PageEditorViewModel` for per-page fine editing (fine rotate, crop).
+### Phase 2 — COMPLETE (2026-07-12)
+Created `PageEditorScreen` + `PageEditorViewModel` for per-page fine editing. Single tap opens editor; long press opens zoom preview.
+
+New files:
+- `domain/model/PageEditorUiState.kt` → `ui/screens/pageeditor/PageEditorUiState.kt`
+- `ui/screens/pageeditor/PageEditorViewModel.kt` — plain ViewModel, `loadPage()` is idempotent
+- `ui/screens/pageeditor/PageEditorScreen.kt` — pure composable: page preview, 90° rotate, fine-rotation slider
+
+Changed files:
+- `domain/model/PageItem.kt` — added `fineRotation: Float = 0f`
+- `ui/screens/pageorganizer/PageOperationsDelegate.kt` — added `updatePage(PageItem)`
+- `ui/screens/merge/MergePdfViewModel.kt` — added `updatePage()` pass-through
+- `ui/components/PageThumbnailCard.kt` — `combinedClickable` (tap = edit, long press = zoom); rotation preview includes `fineRotation`
+- `ui/components/PageEditorGrid.kt` — added `onLongClick` parameter
+- `ui/screens/pageorganizer/PageOrganizerScreen.kt` — added `onLongPressPage` parameter
+- `ui/navigation/NavGraph.kt` — added `page_editor/{pageIndex}` route; `onPageClick` navigates to editor; `onLongPressPage` triggers zoom
+- `data/repository/MergeRepositoryImpl.kt` — applies `fineRotation` in matrix transform
+- `res/values/strings.xml` + `values-fa/strings.xml` — added `single_page_editor_*` strings
 
 ### Phase 3 — PENDING
 Create `PdfEditScreen` + `PdfEditViewModel`. Wire PDF Editor tool end-to-end.

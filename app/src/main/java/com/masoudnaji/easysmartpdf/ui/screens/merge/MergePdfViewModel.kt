@@ -129,6 +129,7 @@ class MergePdfViewModel(application: Application) : AndroidViewModel(application
     fun deletePage(pageId: String) = delegate.delete(pageId)
     fun movePage(from: Int, to: Int) = delegate.move(from, to)
     fun setZoomedPage(pageId: String?) = delegate.setZoomedPage(pageId)
+    fun updatePage(updated: PageItem) = delegate.updatePage(updated)
 
     // ── Phase 3: Merge ───────────────────────────────────────────────────────
 

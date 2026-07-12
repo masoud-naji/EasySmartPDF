@@ -1,8 +1,9 @@
 package com.masoudnaji.easysmartpdf.ui.components
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,6 +44,7 @@ import com.masoudnaji.easysmartpdf.domain.model.ThumbnailState
 import com.masoudnaji.easysmartpdf.ui.theme.Radius
 import com.masoudnaji.easysmartpdf.ui.theme.Spacing
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PageThumbnailCard(
     page: PageItem,
@@ -51,6 +53,7 @@ fun PageThumbnailCard(
     onRotateRight: () -> Unit,
     onDelete: () -> Unit,
     onClick: () -> Unit,
+    onLongClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -64,7 +67,7 @@ fun PageThumbnailCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(0.707f) // A4 portrait ratio
-                    .clickable(onClick = onClick),
+                    .combinedClickable(onClick = onClick, onLongClick = onLongClick),
                 contentAlignment = Alignment.Center
             ) {
                 when (page.thumbnailState) {
@@ -77,7 +80,7 @@ fun PageThumbnailCard(
                                 contentScale = ContentScale.Fit,
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .graphicsLayer { rotationZ = page.rotation.toFloat() }
+                                    .graphicsLayer { rotationZ = page.rotation.toFloat() + page.fineRotation }
                             )
                         }
                     }

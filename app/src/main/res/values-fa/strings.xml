@@ -4,7 +4,7 @@
 
     <!-- Home Screen -->
     <string name="home_title">پونل</string>
-    <string name="feature_pdf_to_images_title">PDF → تصویر</string>
+    <string name="feature_pdf_to_images_title">PDF ← تصویر</string>
     <string name="feature_pdf_to_images_desc">هر صفحه PDF را به تصویر تبدیل کنید.</string>
     <string name="feature_pdf_to_images_action">تبدیل</string>
 
@@ -16,7 +16,7 @@
     <string name="feature_split_pdf_desc">صفحات را استخراج یا PDF را تقسیم کنید.</string>
     <string name="feature_split_pdf_action">تقسیم</string>
 
-    <string name="feature_images_to_pdf_title">تصویر → PDF</string>
+    <string name="feature_images_to_pdf_title">تصویر ← PDF</string>
     <string name="feature_images_to_pdf_desc">تصاویر را به یک PDF تبدیل کنید.</string>
     <string name="feature_images_to_pdf_action">ساخت</string>
 
@@ -181,4 +181,9 @@
         <item quantity="one">ادغام %d صفحه</item>
         <item quantity="other">ادغام %d صفحه</item>
     </plurals>
+
+    <!-- Single Page Editor -->
+    <string name="single_page_editor_title">ویرایش صفحه</string>
+    <string name="single_page_editor_apply">اعمال</string>
+    <string name="single_page_editor_fine_rotation">چرخش دقیق: %1$.1f°</string>
 </resources>

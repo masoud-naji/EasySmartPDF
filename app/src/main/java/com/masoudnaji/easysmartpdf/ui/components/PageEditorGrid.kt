@@ -14,6 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.masoudnaji.easysmartpdf.domain.model.PageItem
 import com.masoudnaji.easysmartpdf.ui.theme.Spacing
@@ -25,6 +27,7 @@ fun PageEditorGrid(
     onRotateRight: (pageId: String) -> Unit,
     onDelete: (pageId: String) -> Unit,
     onPageClick: (pageId: String) -> Unit,
+    onLongClick: (pageId: String) -> Unit,
     onMove: (from: Int, to: Int) -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(Spacing.md)
@@ -44,6 +47,11 @@ fun PageEditorGrid(
     val cardHeightPx = cardWidthPx / 0.707f
 
     val currentPages by rememberUpdatedState(pages)
+
+    // In RTL, LazyVerticalGrid places list[0] in the RIGHT column. We normalise
+    // horizontal drag by negating delta.x so that "positive accX = towards higher
+    // list index" holds in both layout directions.
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(columnCount),
@@ -65,7 +73,8 @@ fun PageEditorGrid(
                     onRotateRight = { onRotateRight(itemKey) },
                     onDelete = { onDelete(itemKey) },
                     onClick = { onPageClick(itemKey) },
-                    modifier = Modifier.pointerInput(itemKey) {
+                    onLongClick = { onLongClick(itemKey) },
+                    modifier = Modifier.pointerInput(itemKey, isRtl) {
                         var trackedIdx = -1
                         var accX = 0f
                         var accY = 0f
@@ -79,12 +88,16 @@ fun PageEditorGrid(
                             onDragCancel = { trackedIdx = -1; accX = 0f; accY = 0f },
                             onDrag = { _, delta ->
                                 if (trackedIdx < 0) return@detectDragGestures
-                                accX += delta.x
+                                // Negate x in RTL so higher accX always means higher list index.
+                                accX += if (isRtl) -delta.x else delta.x
                                 accY += delta.y
                                 val size = currentPages.size
 
-                                // Vertical drag — jump by columnCount positions (same-column, next/prev row)
+                                // Only one axis fires per frame: vertical takes priority.
                                 val vThreshold = cardHeightPx / 2f
+                                val hThreshold = cardWidthPx / 2f
+                                val col = trackedIdx % columnCount
+
                                 if (accY > vThreshold && trackedIdx < size - 1) {
                                     val target = (trackedIdx + columnCount).coerceAtMost(size - 1)
                                     onMove(trackedIdx, target)
@@ -95,18 +108,22 @@ fun PageEditorGrid(
                                     onMove(trackedIdx, target)
                                     trackedIdx = target
                                     accY += cardHeightPx
-                                }
-
-                                // Horizontal drag — move by 1 position (adjacent column swap)
-                                val hThreshold = cardWidthPx / 2f
-                                if (accX > hThreshold && trackedIdx < size - 1) {
-                                    onMove(trackedIdx, trackedIdx + 1)
-                                    trackedIdx++
-                                    accX -= cardWidthPx
-                                } else if (accX < -hThreshold && trackedIdx > 0) {
-                                    onMove(trackedIdx, trackedIdx - 1)
-                                    trackedIdx--
-                                    accX += cardWidthPx
+                                } else if (accX > hThreshold) {
+                                    if (col < columnCount - 1 && trackedIdx < size - 1) {
+                                        onMove(trackedIdx, trackedIdx + 1)
+                                        trackedIdx++
+                                        accX -= cardWidthPx
+                                    } else {
+                                        accX = 0f
+                                    }
+                                } else if (accX < -hThreshold) {
+                                    if (col > 0) {
+                                        onMove(trackedIdx, trackedIdx - 1)
+                                        trackedIdx--
+                                        accX += cardWidthPx
+                                    } else {
+                                        accX = 0f
+                                    }
                                 }
                             }
                         )
