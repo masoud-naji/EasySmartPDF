@@ -46,6 +46,7 @@ class MergePdfViewModel(application: Application) : AndroidViewModel(application
             _uiState.update { it.copy(errorMessage = "This PDF has already been added.") }
             return
         }
+        recycleAndClearPageState()
         val displayName = queryDisplayName(uri)
         _uiState.update { state ->
             state.copy(pdfList = state.pdfList + PdfEntry(uri, displayName, isLoadingMetadata = true))
@@ -67,6 +68,7 @@ class MergePdfViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun removePdf(index: Int) {
+        recycleAndClearPageState()
         _uiState.update { state ->
             val updated = state.pdfList.toMutableList().also { it.removeAt(index) }
             state.copy(pdfList = updated)
@@ -76,6 +78,7 @@ class MergePdfViewModel(application: Application) : AndroidViewModel(application
     fun movePdf(from: Int, to: Int) {
         val list = _uiState.value.pdfList.toMutableList()
         if (from < 0 || to < 0 || from >= list.size || to >= list.size) return
+        recycleAndClearPageState()
         val item = list.removeAt(from)
         list.add(to, item)
         _uiState.update { it.copy(pdfList = list) }
@@ -198,6 +201,21 @@ class MergePdfViewModel(application: Application) : AndroidViewModel(application
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────
+
+    /**
+     * Called whenever pdfList changes so the page editor always reloads
+     * from the current file list on next entry.
+     */
+    private fun recycleAndClearPageState() {
+        thumbnailJob?.cancel()
+        thumbnailJob = null
+        _uiState.value.pages.forEach { page ->
+            page.thumbnail?.let { if (!it.isRecycled) it.recycle() }
+        }
+        _uiState.update {
+            it.copy(pages = emptyList(), thumbnailsLoaded = 0, thumbnailsTotal = 0, zoomedPageId = null)
+        }
+    }
 
     private fun buildOutputFileName(): String {
         val ts = SimpleDateFormat("yyyy-MM-dd_HH-mm", Locale.US).format(Date())

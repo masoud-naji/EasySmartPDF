@@ -114,7 +114,7 @@ fun MergePdfScreen(
                 PrimaryButton(
                     text = stringResource(R.string.merge_arrange_pages),
                     onClick = onNavigateToPageEditor,
-                    enabled = uiState.pdfList.size >= 2
+                    enabled = uiState.pdfList.size >= 2 && uiState.pdfList.none { it.isLoadingMetadata }
                 )
             }
         },
