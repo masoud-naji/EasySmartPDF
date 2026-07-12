@@ -8,6 +8,8 @@ import android.net.Uri
 import android.os.Build
 import android.provider.DocumentsContract
 import android.provider.MediaStore
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -17,6 +19,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.masoudnaji.easysmartpdf.ui.components.PoonelBackground
 import com.masoudnaji.easysmartpdf.ui.screens.home.HomeScreen
 import com.masoudnaji.easysmartpdf.ui.screens.imagetopdf.ImageToPdfProgressScreen
 import com.masoudnaji.easysmartpdf.ui.screens.imagetopdf.ImageToPdfScreen
@@ -63,215 +66,217 @@ object Screen {
 }
 
 @Composable
-fun EasySmartNavHost(
+fun PoonelNavHost(
     navController: NavHostController,
     settingsViewModel: SettingsViewModel,
     modifier: Modifier = Modifier
 ) {
-    NavHost(
-        navController = navController,
-        startDestination = Screen.Home,
-        modifier = modifier
-    ) {
-        composable(Screen.Home) {
-            HomeScreen(
-                onCreatePicturesClick = { navController.navigate(Screen.CreatePictures) },
-                onMergePdfClick = { navController.navigate(Screen.MergePdf) },
-                onSplitPdfClick = { navController.navigate(Screen.SplitPdf) },
-                onImageToPdfClick = { navController.navigate(Screen.ImageToPdf) },
-                onSettingsClick = { navController.navigate(Screen.Settings) }
-            )
-        }
-
-        composable(Screen.Settings) {
-            SettingsScreen(
-                viewModel = settingsViewModel,
-                onBackClick = { navController.popBackStack() }
-            )
-        }
-
-        composable(Screen.CreatePictures) {
-            CreatePicturesScreen(
-                onBackClick = { navController.popBackStack() },
-                onNavigateToProgress = { navController.navigate(Screen.Progress) }
-            )
-        }
-
-        composable(Screen.Progress) { backStackEntry ->
-            val createPicturesEntry = remember(backStackEntry) {
-                navController.getBackStackEntry(Screen.CreatePictures)
+    PoonelBackground {
+        NavHost(
+            navController = navController,
+            startDestination = Screen.Home,
+            modifier = modifier
+        ) {
+            composable(Screen.Home) {
+                HomeScreen(
+                    onCreatePicturesClick = { navController.navigate(Screen.CreatePictures) },
+                    onMergePdfClick = { navController.navigate(Screen.MergePdf) },
+                    onSplitPdfClick = { navController.navigate(Screen.SplitPdf) },
+                    onImageToPdfClick = { navController.navigate(Screen.ImageToPdf) },
+                    onSettingsClick = { navController.navigate(Screen.Settings) }
+                )
             }
-            ProgressScreen(
-                createPicturesEntry = createPicturesEntry,
-                onConversionComplete = { savedCount, folderName ->
-                    navController.navigate(Screen.successDestination(savedCount, folderName)) {
-                        popUpTo(Screen.CreatePictures) { inclusive = true }
-                    }
-                },
-                onConversionFailed = { navController.popBackStack() },
-                onConversionCancelled = { navController.popBackStack() }
-            )
-        }
 
-        composable(
-            route = Screen.SuccessRoute,
-            arguments = listOf(
-                navArgument("savedCount") { type = NavType.IntType },
-                navArgument("folderName") { type = NavType.StringType }
-            )
-        ) { backStackEntry ->
-            val savedCount = backStackEntry.arguments?.getInt("savedCount") ?: 0
-            val folderName = backStackEntry.arguments?.getString("folderName") ?: ""
-            val context = LocalContext.current
-            SuccessScreen(
-                savedCount = savedCount,
-                folderName = folderName,
-                onOpenFolder = { openFolder(context, folderName) },
-                onBackToHome = {
-                    navController.navigate(Screen.Home) {
-                        popUpTo(Screen.Home) { inclusive = true }
-                    }
-                }
-            )
-        }
-
-        // Merge PDF flow
-        composable(Screen.MergePdf) {
-            MergePdfScreen(
-                onBackClick = { navController.popBackStack() },
-                onNavigateToProgress = { navController.navigate(Screen.MergeProgress) }
-            )
-        }
-
-        composable(Screen.MergeProgress) { backStackEntry ->
-            val mergePdfEntry = remember(backStackEntry) {
-                navController.getBackStackEntry(Screen.MergePdf)
+            composable(Screen.Settings) {
+                SettingsScreen(
+                    viewModel = settingsViewModel,
+                    onBackClick = { navController.popBackStack() }
+                )
             }
-            MergeProgressScreen(
-                mergePdfEntry = mergePdfEntry,
-                onMergeComplete = { fileName ->
-                    navController.navigate(Screen.mergeSuccessDestination(fileName)) {
-                        popUpTo(Screen.MergePdf) { inclusive = true }
-                    }
-                },
-                onMergeFailed = { navController.popBackStack() },
-                onMergeCancelled = { navController.popBackStack() }
-            )
-        }
 
-        composable(
-            route = Screen.MergeSuccessRoute,
-            arguments = listOf(
-                navArgument("fileName") { type = NavType.StringType }
-            )
-        ) { backStackEntry ->
-            val fileName = backStackEntry.arguments?.getString("fileName") ?: ""
-            val context = LocalContext.current
-            MergeSuccessScreen(
-                fileName = fileName,
-                onOpenFile = { openMergedFile(context, fileName) },
-                onBackToHome = {
-                    navController.navigate(Screen.Home) {
-                        popUpTo(Screen.Home) { inclusive = true }
-                    }
-                }
-            )
-        }
-
-        // Split PDF flow
-        composable(Screen.SplitPdf) {
-            SplitPdfScreen(
-                onBackClick = { navController.popBackStack() },
-                onNavigateToProgress = { navController.navigate(Screen.SplitProgress) }
-            )
-        }
-
-        composable(Screen.SplitProgress) { backStackEntry ->
-            val splitPdfEntry = remember(backStackEntry) {
-                navController.getBackStackEntry(Screen.SplitPdf)
+            composable(Screen.CreatePictures) {
+                CreatePicturesScreen(
+                    onBackClick = { navController.popBackStack() },
+                    onNavigateToProgress = { navController.navigate(Screen.Progress) }
+                )
             }
-            SplitProgressScreen(
-                splitPdfEntry = splitPdfEntry,
-                onSplitComplete = { fileCount, folderName ->
-                    navController.navigate(Screen.splitSuccessDestination(fileCount, folderName)) {
-                        popUpTo(Screen.SplitPdf) { inclusive = true }
-                    }
-                },
-                onSplitFailed = { navController.popBackStack() },
-                onSplitCancelled = { navController.popBackStack() }
-            )
-        }
 
-        composable(
-            route = Screen.SplitSuccessRoute,
-            arguments = listOf(
-                navArgument("fileCount") { type = NavType.IntType },
-                navArgument("folderName") { type = NavType.StringType }
-            )
-        ) { backStackEntry ->
-            val fileCount = backStackEntry.arguments?.getInt("fileCount") ?: 0
-            val folderName = backStackEntry.arguments?.getString("folderName") ?: ""
-            val context = LocalContext.current
-            SplitSuccessScreen(
-                fileCount = fileCount,
-                folderName = folderName,
-                onOpenFolder = { openSplitFolder(context, folderName) },
-                onBackToHome = {
-                    navController.navigate(Screen.Home) {
-                        popUpTo(Screen.Home) { inclusive = true }
-                    }
+            composable(Screen.Progress) { backStackEntry ->
+                val createPicturesEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(Screen.CreatePictures)
                 }
-            )
-        }
-
-        // Image to PDF flow
-        composable(Screen.ImageToPdf) {
-            ImageToPdfScreen(
-                onBackClick = { navController.popBackStack() },
-                onNavigateToProgress = { navController.navigate(Screen.ImageToPdfProgress) }
-            )
-        }
-
-        composable(Screen.ImageToPdfProgress) { backStackEntry ->
-            val imageToPdfEntry = remember(backStackEntry) {
-                navController.getBackStackEntry(Screen.ImageToPdf)
+                ProgressScreen(
+                    createPicturesEntry = createPicturesEntry,
+                    onConversionComplete = { savedCount, folderName ->
+                        navController.navigate(Screen.successDestination(savedCount, folderName)) {
+                            popUpTo(Screen.CreatePictures) { inclusive = true }
+                        }
+                    },
+                    onConversionFailed = { navController.popBackStack() },
+                    onConversionCancelled = { navController.popBackStack() }
+                )
             }
-            ImageToPdfProgressScreen(
-                imageToPdfEntry = imageToPdfEntry,
-                onCreateComplete = { fileName ->
-                    navController.navigate(Screen.imageToPdfSuccessDestination(fileName)) {
-                        popUpTo(Screen.ImageToPdf) { inclusive = true }
-                    }
-                },
-                onCreateFailed = { navController.popBackStack() },
-                onCreateCancelled = { navController.popBackStack() }
-            )
-        }
 
-        composable(
-            route = Screen.ImageToPdfSuccessRoute,
-            arguments = listOf(
-                navArgument("fileName") { type = NavType.StringType }
-            )
-        ) { backStackEntry ->
-            val fileName = backStackEntry.arguments?.getString("fileName") ?: ""
-            val context = LocalContext.current
-            ImageToPdfSuccessScreen(
-                fileName = fileName,
-                onOpenFile = { openImageToPdfFile(context, fileName) },
-                onBackToHome = {
-                    navController.navigate(Screen.Home) {
-                        popUpTo(Screen.Home) { inclusive = true }
+            composable(
+                route = Screen.SuccessRoute,
+                arguments = listOf(
+                    navArgument("savedCount") { type = NavType.IntType },
+                    navArgument("folderName") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val savedCount = backStackEntry.arguments?.getInt("savedCount") ?: 0
+                val folderName = backStackEntry.arguments?.getString("folderName") ?: ""
+                val context = LocalContext.current
+                SuccessScreen(
+                    savedCount = savedCount,
+                    folderName = folderName,
+                    onOpenFolder = { openFolder(context, folderName) },
+                    onBackToHome = {
+                        navController.navigate(Screen.Home) {
+                            popUpTo(Screen.Home) { inclusive = true }
+                        }
                     }
+                )
+            }
+
+            // Merge PDF flow
+            composable(Screen.MergePdf) {
+                MergePdfScreen(
+                    onBackClick = { navController.popBackStack() },
+                    onNavigateToProgress = { navController.navigate(Screen.MergeProgress) }
+                )
+            }
+
+            composable(Screen.MergeProgress) { backStackEntry ->
+                val mergePdfEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(Screen.MergePdf)
                 }
-            )
+                MergeProgressScreen(
+                    mergePdfEntry = mergePdfEntry,
+                    onMergeComplete = { fileName ->
+                        navController.navigate(Screen.mergeSuccessDestination(fileName)) {
+                            popUpTo(Screen.MergePdf) { inclusive = true }
+                        }
+                    },
+                    onMergeFailed = { navController.popBackStack() },
+                    onMergeCancelled = { navController.popBackStack() }
+                )
+            }
+
+            composable(
+                route = Screen.MergeSuccessRoute,
+                arguments = listOf(
+                    navArgument("fileName") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val fileName = backStackEntry.arguments?.getString("fileName") ?: ""
+                val context = LocalContext.current
+                MergeSuccessScreen(
+                    fileName = fileName,
+                    onOpenFile = { openMergedFile(context, fileName) },
+                    onBackToHome = {
+                        navController.navigate(Screen.Home) {
+                            popUpTo(Screen.Home) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
+            // Split PDF flow
+            composable(Screen.SplitPdf) {
+                SplitPdfScreen(
+                    onBackClick = { navController.popBackStack() },
+                    onNavigateToProgress = { navController.navigate(Screen.SplitProgress) }
+                )
+            }
+
+            composable(Screen.SplitProgress) { backStackEntry ->
+                val splitPdfEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(Screen.SplitPdf)
+                }
+                SplitProgressScreen(
+                    splitPdfEntry = splitPdfEntry,
+                    onSplitComplete = { fileCount, folderName ->
+                        navController.navigate(Screen.splitSuccessDestination(fileCount, folderName)) {
+                            popUpTo(Screen.SplitPdf) { inclusive = true }
+                        }
+                    },
+                    onSplitFailed = { navController.popBackStack() },
+                    onSplitCancelled = { navController.popBackStack() }
+                )
+            }
+
+            composable(
+                route = Screen.SplitSuccessRoute,
+                arguments = listOf(
+                    navArgument("fileCount") { type = NavType.IntType },
+                    navArgument("folderName") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val fileCount = backStackEntry.arguments?.getInt("fileCount") ?: 0
+                val folderName = backStackEntry.arguments?.getString("folderName") ?: ""
+                val context = LocalContext.current
+                SplitSuccessScreen(
+                    fileCount = fileCount,
+                    folderName = folderName,
+                    onOpenFolder = { openSplitFolder(context, folderName) },
+                    onBackToHome = {
+                        navController.navigate(Screen.Home) {
+                            popUpTo(Screen.Home) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
+            // Image to PDF flow
+            composable(Screen.ImageToPdf) {
+                ImageToPdfScreen(
+                    onBackClick = { navController.popBackStack() },
+                    onNavigateToProgress = { navController.navigate(Screen.ImageToPdfProgress) }
+                )
+            }
+
+            composable(Screen.ImageToPdfProgress) { backStackEntry ->
+                val imageToPdfEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(Screen.ImageToPdf)
+                }
+                ImageToPdfProgressScreen(
+                    imageToPdfEntry = imageToPdfEntry,
+                    onCreateComplete = { fileName ->
+                        navController.navigate(Screen.imageToPdfSuccessDestination(fileName)) {
+                            popUpTo(Screen.ImageToPdf) { inclusive = true }
+                        }
+                    },
+                    onCreateFailed = { navController.popBackStack() },
+                    onCreateCancelled = { navController.popBackStack() }
+                )
+            }
+
+            composable(
+                route = Screen.ImageToPdfSuccessRoute,
+                arguments = listOf(
+                    navArgument("fileName") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val fileName = backStackEntry.arguments?.getString("fileName") ?: ""
+                val context = LocalContext.current
+                ImageToPdfSuccessScreen(
+                    fileName = fileName,
+                    onOpenFile = { openImageToPdfFile(context, fileName) },
+                    onBackToHome = {
+                        navController.navigate(Screen.Home) {
+                            popUpTo(Screen.Home) { inclusive = true }
+                        }
+                    }
+                )
+            }
         }
     }
 }
 
 private fun openFolder(context: Context, folderName: String) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        val docId = "primary:Pictures/EasySmartPDF/$folderName"
+        val docId = "primary:Pictures/Poonel/$folderName"
         val uri = DocumentsContract.buildDocumentUri("com.android.externalstorage.documents", docId)
         val intent = Intent(Intent.ACTION_VIEW).apply {
             setDataAndType(uri, DocumentsContract.Document.MIME_TYPE_DIR)
@@ -333,9 +338,9 @@ private fun openImageToPdfFile(context: Context, fileName: String) {
 private fun openSplitFolder(context: Context, folderName: String) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         val docId = if (folderName.isEmpty())
-            "primary:Documents/EasySmartPDF/Split"
+            "primary:Documents/Poonel/Split"
         else
-            "primary:Documents/EasySmartPDF/Split/$folderName"
+            "primary:Documents/Poonel/Split/$folderName"
         val uri = DocumentsContract.buildDocumentUri("com.android.externalstorage.documents", docId)
         val intent = Intent(Intent.ACTION_VIEW).apply {
             setDataAndType(uri, DocumentsContract.Document.MIME_TYPE_DIR)

@@ -2,29 +2,40 @@ package com.masoudnaji.easysmartpdf.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Modern Blue-Gray Palette (Neutral & Calm)
-val PrimaryLight = Color(0xFF455A64) // Slate Blue Gray
-val OnPrimaryLight = Color(0xFFFFFFFF)
-val PrimaryContainerLight = Color(0xFFECEFF1)
-val OnPrimaryContainerLight = Color(0xFF263238)
+// Poonel Premium Branding - Honey & Charcoal Palette
 
-val SecondaryLight = Color(0xFF607D8B) // Muted Blue Gray
+// --- LIGHT THEME ---
+val PrimaryLight = Color(0xFFE9A600)           // Warm Honey
+val OnPrimaryLight = Color(0xFF1F1F1F)         // High-contrast dark charcoal for yellow
+val PrimaryContainerLight = Color(0xFFFFE082)
+val OnPrimaryContainerLight = Color(0xFF1F1F1F)
+
+val SecondaryLight = Color(0xFF263238)         // Charcoal
 val OnSecondaryLight = Color(0xFFFFFFFF)
 
-val TertiaryLight = Color(0xFF4DB6AC) // Muted Teal for soft accents
+val TertiaryLight = Color(0xFFD8A300)          // Accent Honey
+val OnTertiaryLight = Color(0xFF1F1F1F)
 
-val BackgroundLight = Color(0xFFFAFAFA)
-val SurfaceLight = Color(0xFFFFFFFF)
-val OnSurfaceLight = Color(0xFF263238)
-val SurfaceVariantLight = Color(0xFFCFD8DC)
+val BackgroundLight = Color(0xFFFFFBF2)        // Warm Off-white / Parchment
+val SurfaceLight = Color(0xFFFFFFFF)           // Pure white cards
+val OnSurfaceLight = Color(0xFF263238)         // Charcoal text
+val SurfaceVariantLight = Color(0xFFE6E1D9)    // Warm Gray for dividers/outlines
+val OnSurfaceVariantLight = Color(0xFF49463F)
 
-// Dark Palette — brand color preserved, surface distinct from background
-val PrimaryDark = Color(0xFF455A64)      // Same brand color as light mode
-val OnPrimaryDark = Color(0xFFFFFFFF)    // White text on brand button
-val PrimaryContainerDark = Color(0xFF37474F)
-val OnPrimaryContainerDark = Color(0xFFECEFF1)
+// --- DARK THEME ---
+val PrimaryDark = Color(0xFFE9A600)            // Honey brand color remains identical
+val OnPrimaryDark = Color(0xFF1F1F1F)
+val PrimaryContainerDark = Color(0xFF4F3700)   // Dark Amber
+val OnPrimaryContainerDark = Color(0xFFFFE082)
 
-val BackgroundDark = Color(0xFF1C1C1E)
-val SurfaceDark = Color(0xFF2C2C2E)      // Visibly elevated above background
-val OnSurfaceDark = Color(0xFFE1E1E1)
-val SurfaceVariantDark = Color(0xFF3C3C3E)
+val BackgroundDark = Color(0xFF1C1B17)         // Warm Charcoal Background
+val SurfaceDark = Color(0xFF2D2C28)            // Elevated charcoal surface
+val OnSurfaceDark = Color(0xFFE6E1D9)          // Warm Light Gray text
+val SurfaceVariantDark = Color(0xFF49463F)     // Dark Warm Gray for outlines
+val OnSurfaceVariantDark = Color(0xFFE6E1D9)
+
+val SecondaryDark = Color(0xFFCFD8DC)          // Muted light gray for dark mode secondary
+val OnSecondaryDark = Color(0xFF1C1B17)
+
+val TertiaryDark = Color(0xFFD8A300)
+val OnTertiaryDark = Color(0xFF1F1F1F)

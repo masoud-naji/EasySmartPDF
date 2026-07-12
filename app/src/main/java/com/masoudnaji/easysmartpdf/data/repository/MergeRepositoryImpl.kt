@@ -24,7 +24,7 @@ class MergeRepositoryImpl(private val context: Context) : MergeRepository {
     companion object {
         private const val TAG = "MergeRepo"
         // MediaStore.Files only allows Download or Documents as the root directory
-        private const val OUTPUT_RELATIVE_PATH = "Documents/EasySmartPDF"
+        private const val OUTPUT_RELATIVE_PATH = "Documents/Poonel"
     }
 
     override fun mergePdfs(config: MergeConfig): Flow<MergeEvent> = flow {

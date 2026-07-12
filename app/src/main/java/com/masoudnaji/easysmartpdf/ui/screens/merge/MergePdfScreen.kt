@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -38,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import android.text.format.Formatter
 import androidx.compose.ui.platform.LocalContext
@@ -98,13 +100,17 @@ fun MergePdfScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)
                 )
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
-            Column(modifier = Modifier.padding(Spacing.lg)) {
+            Column(
+                modifier = Modifier
+                    .navigationBarsPadding()
+                    .padding(Spacing.lg)
+            ) {
                 PrimaryButton(
                     text = stringResource(R.string.merge_action),
                     onClick = {
@@ -115,7 +121,8 @@ fun MergePdfScreen(
                 )
             }
         },
-        modifier = modifier
+        modifier = modifier,
+        containerColor = Color.Transparent
     ) { innerPadding ->
         Column(
             modifier = Modifier

@@ -107,9 +107,9 @@ class SplitRepositoryImpl(private val context: Context) : SplitRepository {
 
     private fun saveDocument(document: PdfDocument, fileName: String, subFolder: String): Uri {
         val relativePath = if (subFolder.isNotEmpty())
-            "Documents/EasySmartPDF/Split/$subFolder"
+            "Documents/Poonel/Split/$subFolder"
         else
-            "Documents/EasySmartPDF/Split"
+            "Documents/Poonel/Split"
         val resolver = context.contentResolver
 
         val values = ContentValues().apply {

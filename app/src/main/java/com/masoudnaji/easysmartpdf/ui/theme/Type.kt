@@ -6,7 +6,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-// EasySmartPDF Typography: Large and readable
+// Poonel Typography: Large and readable
 val Typography = Typography(
     displayLarge = TextStyle(
         fontFamily = FontFamily.Default,

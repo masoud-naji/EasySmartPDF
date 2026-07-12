@@ -1,447 +1,65 @@
 # AI_HANDOFF.md
 
-# EasySmartPDF — Current Project Status
+# Poonel — Current Project Status
 
-Last Updated:
-2026-07-05 (Manual illustration control system implemented)
+Last Updated: 2026-07-07
+Brand: **Poonel** (Smart PDF Tools)
+Visual Identity: **Premium Honey & Charcoal Architectural Design**
 
 ---
 
 ## Project Goal
-
-Build the easiest PDF utility app on Android.
-
-Current priority:
-
-Split PDF Phase 1 implemented and building clean. Ready for device testing.
+Build the easiest and most premium PDF utility app on Android.
 
 ---
 
-## Completed
+## Current Status: Phase 1 Completed
+The app has 4 stable core features and a fully integrated premium design system.
 
-* Android Studio project created.
-* Git repository initialized.
-* Initial project structure completed.
-* Material 3 Design System completed.
-* Navigation implemented.
-* Home Screen completed.
-* Create Pictures screen completed.
-* PDF picker implemented.
-* PDF metadata reading implemented.
-* Page count detection implemented.
-* Picture Size selection implemented.
-* Page Selection UI implemented.
-* Range sliders implemented.
-* Numeric page inputs implemented (widened to 96dp to fit 4-digit page numbers).
-* Unsaved changes confirmation dialog implemented.
-* Domain layer implemented: PdfInfo, ImageFormat, ImageQuality, RenderedPage, ConversionConfig, ConversionEvent, PdfRepository (interface), ImageRepository (interface).
-* UseCase layer implemented: GetPdfInfoUseCase, ConvertPdfToImagesUseCase.
-* Data layer implemented: PdfRepositoryImpl (PdfRenderer, IO dispatcher, white background, page-by-page rendering, proper cleanup), ImageRepositoryImpl (MediaStore, IS_PENDING on API 29+, scoped storage).
-* CreatePicturesViewModel implemented (AndroidViewModel, StateFlow, all user events).
-* CreatePicturesUiState implemented (PageMode, ConversionState sealed interface).
-* CreatePicturesScreen wired to ViewModel. All business logic removed from Composable.
-* ConversionEvent pipeline: Started → Progress → PageSaved → Completed → Failed.
-* Progress Screen implemented: "Page X of Y", "Saving image X…", LinearProgressIndicator updating after each saved page, Cancel button with confirmation dialog.
-* Conversion cancellation implemented: cooperative coroutine cancellation via Job.cancel(), already-saved images preserved, returns to CreatePictures with settings intact.
-* Per-conversion folder structure: Pictures/EasySmartPDF/<PdfName>_<Quality>_<yyyyMMdd_HHmm>/page_001.jpg (API 29+). Invalid filename chars stripped. 3-digit zero-padded page numbers.
-* Success Screen implemented: shows total pictures saved, folder name, "Open Folder" button (opens DocumentsUI, fallback to gallery), "Back Home" button.
-* Navigation flow complete: Home → CreatePictures → Progress → Success → Home.
-* Success nav args: savedCount (Int) and folderName (String) passed via nav route.
-* Merge PDF Phase 1 implemented: add PDFs, reorderable list (drag-to-reorder via long press on handle), remove individual files, merge disabled until ≥2 PDFs selected.
-* Split PDF Phase 1 implemented: select one PDF, show filename/page count/file size, choose All Pages or Page Range (same range UI as CreatePictures), split each selected page into a separate PDF, save to Documents/EasySmartPDF/Split/<PdfName>_<yyyyMMdd_HHmm>/ with filenames page_001.pdf etc., progress screen ("Splitting page X of Y"), cancel support, success screen with file count, folder name, Open Folder, and Back Home.
-* Split PDF output mode: "Output" card appears when more than one page is selected. Default = Single PDF (all selected pages merged into one output PDF). Separate PDFs = one file per page (original behavior). `SplitConfig.separatePdfs: Boolean` routes the repository to the correct branch.
-* Merge pipeline: MergeConfig → MergePdfUseCase → MergeRepositoryImpl → PdfRenderer per page → PdfDocument output → MediaStore save.
-* Merged output: Documents/EasySmartPDF/Merged_yyyy-MM-dd_HH-mm.pdf — MediaStore.Files requires Documents or Download as root (Pictures caused IllegalArgumentException on API 29+).
-* Merge navigation: Home → MergePdf → MergeProgress → MergeSuccess → Home. Shared ViewModel pattern mirrors PDF-to-image flow.
-* MergeSuccessScreen shows output filename, "Open File" button (tries DocumentsUI, falls back to PDF viewer intent), "Back Home" button.
-* HomeScreen: Merge PDF card is now active (isAvailable = true) and navigates to MergePdfScreen.
-* HomeScreen: Split PDF card is now active (isAvailable = true) and navigates to SplitPdfScreen.
-* Image to PDF implemented: select multiple images, reorder via drag-and-drop, configure PDF options (page size, orientation, margins, quality, fit mode), create PDF saved to Documents/EasySmartPDF/, Open File on success.
-* HomeScreen: Image to PDF card active, compact 4-card layout (28dp icon, titleMedium, bodySmall, Spacing.sm gaps) fits without scrolling on modern phones.
-* Settings screen implemented: Appearance (System/Light/Dark theme via DataStore), Language (dialog with English/فارسی, preference stored, locale switching deferred), About (app name, version, privacy policy placeholder). Settings icon in Home top bar. Theme applied live at Activity level via SettingsViewModel.
+### Completed Features
+* ✅ **PDF → Images**: Stable conversion with quality settings and folder organization.
+* ✅ **Merge PDF**: Multi-file selection with drag-and-drop reordering.
+* ✅ **Split PDF**: All pages or range, output as single or separate files.
+* ✅ **Images → PDF**: Multi-image to PDF with page size, orientation, and quality options.
+* ✅ **Design System**: Global "PoonelBackground" with architectural honeycomb network.
+* ✅ **Navigation**: Unified flow with transparent screen layering.
+* ✅ **Branding**: Official "Poonel" branding integrated with new logo (Hexagon + PDF + Honeycomb design).
+* ✅ **About Section**: Updated with clickable Privacy Policy (https://poonel.app/privacy) and Support (support@poonel.app) links.
+* ✅ **Settings**: Live theme switching (Light/Dark) via DataStore. Logo integrated into About section.
 
 ---
 
-## Current Architecture
-
-```
-UI (Composable)
-↓
-ViewModel (AndroidViewModel + StateFlow)
-↓
-UseCases (domain/usecase/)   ← should be in domain/usecase/pdftoimage/ but not yet moved
-↓
-Repository Interfaces (domain/repository/)
-↓
-Repository Implementations (data/repository/)
-↓
-PdfRenderer / MediaStore
-```
-
-Note: Hilt is listed in PROJECT_RULES.md but not yet added.
-AndroidViewModel with manual wiring is the current DI approach.
+## Design System Details
+* **PoonelBackground**: Procedural Canvas-drawn vertical technical network. Anchored to corners/edges. Honey Gold (`#E9A600`) on Charcoal (`#1C1B17`).
+* **Transparency**: All `Scaffold` containers use `Color.Transparent`.
+* **Glass Effect**: Top bars use `alpha = 0.85f` for a modern layered look.
 
 ---
 
-## Key Implementation Details
-
-### Folder naming
-Generated in `CreatePicturesViewModel.buildFolderName()`:
-`<sanitized_pdf_name>_<Quality>_<yyyyMMdd_HHmm>` (e.g., `MyDocument_Best_20260628_1430`).
-Chars `/ \ : * ? " < > |` replaced with `_`. Name capped at 40 chars before suffix.
-On API 26-28: RELATIVE_PATH is not supported; images saved without subfolder (known limitation).
-
-### Cancellation flow
-`cancelConversion()` in ViewModel: cancels the coroutine Job, sets `conversionState = Cancelled`.
-ProgressScreen detects `Cancelled` via `LaunchedEffect(state)` → calls `onConversionCancelled()` → navController pops back to CreatePictures.
-`isConverting` in CreatePicturesScreen excludes `Cancelled` state so the button re-enables after cancel.
-`startConversion()` guard also accepts `Cancelled` state to allow restarting.
-
-### Open Folder
-NavGraph.kt `openFolder()` private function: on API 29+, tries DocumentsUI with
-`com.android.externalstorage.documents` authority and `primary:Pictures/EasySmartPDF/<folderName>` doc ID.
-Falls back to opening the system gallery if ActivityNotFoundException.
+## Architecture
+* **MVVM + Clean Architecture**: Clear separation between UI, Domain (Models/UseCases), and Data (PdfRenderer/MediaStore).
+* **Global Branding**: `PoonelBackground` wraps the `NavHost` in `NavGraph.kt`.
+* **Local Processing**: No external SDKs; all work done via native Android APIs.
 
 ---
 
-## Open Decisions — Must Resolve Before Next Step
-
-1. Should data/source/pdf/ and data/source/storage/ be used as a separate DataSource layer
-   below the repository implementations, or removed?
-   Current state: directories exist but are empty.
-
-2. Move GetPdfInfoUseCase and ConvertPdfToImagesUseCase to domain/usecase/pdftoimage/
-   to match the pre-existing scaffold. Not yet done.
-
-3. Runtime permission for WRITE_EXTERNAL_STORAGE on API 26-28 is NOT yet requested.
-   The manifest declares it but the ViewModel never requests it at runtime.
-   Conversion will fail silently on API 26-28 without this.
-   Must be resolved before the first real end-to-end test.
-
-4. On API 26-28, images are saved without subfolder (RELATIVE_PATH not available).
-   The folder name shown on the Success Screen will be technically inaccurate on those devices.
-   Decide: implement File-based fallback for API 26-28, or document as limitation.
+## Known TODOs / Next Steps
+1. **Language Switching**: Finalize the runtime locale override for Persian/English.
+2. **Permissions**: Request `WRITE_EXTERNAL_STORAGE` on API 26-28.
+3. **Scanner (Phase 2)**: Implementation of document scanning.
+4. **OCR (Phase 2)**: Text extraction from PDF/Images.
+5. **App Icon**: Update launcher foreground with the Honeycomb/Hexagon brand logo.
 
 ---
 
-## Not Started
-
-* Runtime permission request (WRITE_EXTERNAL_STORAGE, API 26-28) — conversion will fail silently on API 26-28 without this
-* Share images from Success Screen
-* Hilt dependency injection
-* OCR
-* Scanner (Scan to PDF)
-
----
-
-## Frozen
-
-Do not redesign:
-
-* Home Screen
-* Navigation
-* Design System
-* UX Flow
-
-unless explicitly requested.
+## Documentation Updated
+* ✅ `README.md`: New branding, philosophy, and features.
+* ✅ `PROJECT_RULES.md`: Design system rules and global background requirements.
+* ✅ `ARCHITECTURE.md`: Layer definitions and design system integration.
+* ✅ `DECISIONS.md`: Brand identity and background evolution history.
+* ✅ `AI_HANDOFF.md`: Current project state.
 
 ---
 
-## AI Rules
-
-Always read before making changes:
-
-1. PROJECT_RULES.md
-2. CLAUDE.md or GEMINI.md
-3. DECISIONS.md
-4. AI_HANDOFF.md
-
-Never continue from memory.
-
-Always continue from this file.
-
----
-
-## Current Feature
-
-Split PDF Phase 1 — implemented and build is clean.
-
-### Bugs fixed in MergeRepositoryImpl (2026-06-28)
-1. **Wrong RELATIVE_PATH**: `MediaStore.Files` only accepts `Documents` or `Download` as root.
-   Was: `Pictures/EasySmartPDF/Merged` → Fixed: `Documents/EasySmartPDF`.
-2. **ParcelFileDescriptor double-close**: removed outer `pfd.use` — PdfRenderer owns the pfd lifecycle.
-3. **Silent exceptions**: `.catch` now emits the actual exception class + message.
-4. **Logging**: `Log.d(TAG, ...)` added at every major step including final output URI.
-
-### Drag-and-drop fixed in MergePdfScreen (2026-06-28)
-Root cause 1: `detectDragGesturesAfterLongPress` lost the gesture to the parent `verticalScroll`
-during the 400 ms long-press wait — the parent claimed vertical movement before the long press fired.
-Root cause 2: after each swap, `currentList` (backed by `rememberUpdatedState`) still returned
-the pre-swap order for the rest of the current frame (recomposition is one frame async). So
-`indexOfFirst` found the item at its old index and swapped the wrong entry on rapid multi-step drags.
-
-Fix (MergePdfScreen.kt — `ReorderablePdfList`):
-- Replaced `detectDragGesturesAfterLongPress` with `detectDragGestures`. The drag handle is
-  an explicit drag target, so no long press is needed. `detectDragGestures` claims the gesture
-  at slop in the Main pass (child before parent), preventing the parent scroll from winning.
-- Stable `pointerInput` key: `uri.toString()` — survives recompositions from list reorders
-  without cancelling an in-progress drag (was `index`, which restarted on every reorder).
-- `rememberUpdatedState(pdfList)` — gives the coroutine the current list for `size` checks
-  and initial index lookup at drag start.
-- Local `trackedIdx` and `accumulator` inside the `pointerInput` block: updated synchronously
-  on every swap (`trackedIdx++/--`, `accumulator -= itemHeightPx`), so multi-step drags across
-  the entire list work correctly even when recomposition lags a frame.
-- `key(entry.uri.toString())` wraps each `PdfListItem` inside `forEachIndexed`. Without it,
-  `Column` uses positional reconciliation: when items swap positions Compose sees a different
-  `pointerInput` key at each slot, restarts both coroutines, and cancels the in-progress gesture
-  after every single move — forcing the user to release and re-drag. With `key()`, Compose tracks
-  composables by URI identity so the item moves in the tree instead of being recreated; the
-  `pointerInput` coroutine (and its `trackedIdx`) survives the reorder and the gesture continues
-  across the full list in one uninterrupted press-and-hold.
-
-### Progressive metadata loading (2026-06-28)
-`PdfEntry` has `isLoadingMetadata: Boolean = false`.
-`addPdf()` now two-phases:
-1. Queries `DISPLAY_NAME` synchronously (ContentResolver DB lookup, main-thread safe) and adds
-   the entry immediately with `isLoadingMetadata = true` — filename appears at once.
-2. Launches a coroutine: `withContext(IO) { readSizeAndPageCount(uri) }` reads `SIZE` and opens
-   `PdfRenderer` to get page count, then finds the entry by URI and patches it with
-   `copy(pageCount, fileSize, isLoadingMetadata = false)`.
-Each file updates individually; multi-file selections appear and resolve one by one.
-`PdfListItem` shows `"Loading details…"` while `isLoadingMetadata = true`, then the real meta line.
-Summary totals (`totalPages`, `totalSize`) automatically reflect partial state during loading.
-
-### PDF metadata in list items (2026-06-28)
-`PdfEntry` extended with `pageCount: Int` and `fileSize: Long`.
-`addPdf()` now launches `withContext(Dispatchers.IO) { buildPdfEntry(uri) }` which:
-- queries `OpenableColumns.DISPLAY_NAME` + `OpenableColumns.SIZE` in one ContentResolver call
-- opens a `PdfRenderer` to read `pageCount`, then closes it (PdfRenderer owns the pfd lifecycle)
-- double-checks for duplicates after IO before updating state (concurrent-add guard)
-`PdfListItem` shows `"N pages • X.X MB"` as a second line using `Formatter.formatShortFileSize`.
-Line is omitted entirely if both values are zero (graceful failure).
-`index`/`total` parameters removed from `PdfListItem` (were only used for "File X of Y" display).
-
-### PDF list summary (MergePdfScreen)
-When the list is non-empty, two `Text` lines appear above `ReorderablePdfList` inside the card:
-- Line 1: `pluralStringResource(R.plurals.merge_summary_count, count, count)` → "5 PDFs selected"
-- Line 2: `"$totalPages pages • ${Formatter.formatShortFileSize(context, totalSize)}"` → "146 pages • 142 MB"
-  (only rendered when at least one value is non-zero; each part omitted if its value is zero)
-Both recompute from `uiState.pdfList` on every recomposition — automatically reflects add/remove/reorder.
-Typography: `bodyLarge`/`onSurface` for count; `bodySmall`/`outline` for pages+size (matches existing card style).
-
-### "Add More PDFs" button (MergePdfScreen)
-The existing `SecondaryButton` at the bottom of the card changes its label based on list state:
-- Empty list → "Add PDF" (`merge_add_pdf`)
-- Non-empty list → "Add More PDFs" (`merge_add_more_pdf`)
-Same position, same action (opens multi-file picker), same duplicate detection.
-
-### Multi-file picker (MergePdfScreen — pdfPickerLauncher)
-`OpenDocument()` replaced with `OpenMultipleDocuments()`. Result callback iterates the returned
-list and calls `viewModel.addPdf(uri)` for each entry. Duplicate detection in `addPdf()` already
-handles repeated URIs across selections — each duplicate shows the Snackbar and is skipped.
-
-### Duplicate PDF detection (MergePdfViewModel — addPdf)
-`addPdf()` checks `pdfList.any { it.uri == uri }` before adding. If duplicate, sets
-`errorMessage = "This PDF has already been added."` and returns. `MergePdfScreen` shows
-this via `LaunchedEffect(uiState.errorMessage) → snackbarHostState.showSnackbar(...)` then
-calls `onErrorDismissed()` to clear it.
-
-### Known follow-up (low priority)
-NavGraph's `openMergedFile()` still references the old `Pictures/EasySmartPDF/Merged/` DocumentsUI path.
-The "Open File" button on the Success screen may not open the file until this is updated.
-
-## Split PDF — Implementation Details
-
-### Output mode (added same session)
-- `SplitOutputMode` enum in `SplitPdfUiState.kt`: SINGLE_PDF (default) / SEPARATE_PDFS
-- `SplitConfig.separatePdfs: Boolean` — domain-layer flag; ViewModel maps `outputMode == SEPARATE_PDFS`
-- `SplitRepositoryImpl`: two branches — Separate PDFs (unchanged: one PdfDocument per page, subfolder); Single PDF (all pages into one PdfDocument, no subfolder, `folderName=""` in Completed event)
-- `SplitPdfScreen`: Output card (Card 3) visible when `selectedPageCount > 1`; hidden for single-page PDFs/ranges
-- `SplitSuccessScreen`: empty `folderName` → "Saved in Documents/EasySmartPDF/Split"; non-empty → "Saved in <folderName>"
-- `openSplitFolder` in NavGraph: `folderName.isEmpty()` → opens `primary:Documents/EasySmartPDF/Split`
-
-### New files (Split PDF Phase 1)
-- `domain/model/SplitConfig.kt` — pdfUri, folderName, pagesToSplit (1-based list)
-- `domain/model/SplitEvent.kt` — Started / Progress / Completed / Failed
-- `domain/repository/SplitRepository.kt` — interface
-- `domain/usecase/SplitPdfUseCase.kt` — delegates to SplitRepository
-- `data/repository/SplitRepositoryImpl.kt` — PdfRenderer opens source once; each page rendered to bitmap → PdfDocument (1 page) → MediaStore. RELATIVE_PATH = Documents/EasySmartPDF/Split/<folderName>
-- `ui/screens/split/SplitPdfUiState.kt` — SplitPdfUiState + SplitPageMode enum + SplitState sealed interface
-- `ui/screens/split/SplitPdfViewModel.kt` — AndroidViewModel; queries fileSize via ContentResolver alongside PdfInfo
-- `ui/screens/split/SplitPdfScreen.kt` — PDF picker, file info card (name/pages/size), page selection card (All / Range with slider+input identical to CreatePictures)
-- `ui/screens/split/SplitProgressScreen.kt` — "Splitting page X of Y", LinearProgressIndicator, Cancel with dialog
-- `ui/screens/split/SplitSuccessScreen.kt` — file count, folder name, Open Folder, Back Home
-
-### Output path
-`Documents/EasySmartPDF/Split/<PdfName>_<yyyyMMdd_HHmm>/page_001.pdf`
-
-### Navigation
-Home → SplitPdf → SplitProgress → SplitSuccess → Home.
-Shared ViewModel pattern: SplitProgressScreen receives SplitPdf back-stack entry.
-
-### Open Folder
-`openSplitFolder()` in NavGraph: docId = `primary:Documents/EasySmartPDF/Split/<folderName>`. Same DocumentsUI intent pattern as other features.
-
-## Image to PDF — Implementation Details
-
-### New files
-- `domain/model/ImageEntry.kt` — uri, displayName, width, height, fileSize, isLoadingMetadata
-- `domain/model/ImageToPdfConfig.kt` — config + enums: PdfPageSize, PdfOrientation, PdfMargin, PdfOutputQuality, FitMode
-- `domain/model/ImageToPdfEvent.kt` — Started / Progress / Completed / Failed
-- `domain/repository/ImageToPdfRepository.kt` — interface
-- `domain/usecase/ImageToPdfUseCase.kt` — delegates to repository
-- `data/repository/ImageToPdfRepositoryImpl.kt` — BitmapFactory decode → PdfDocument → MediaStore
-- `ui/screens/imagetopdf/ImageToPdfUiState.kt` — state + ImageToPdfState sealed interface
-- `ui/screens/imagetopdf/ImageToPdfViewModel.kt` — two-phase add, thumbnail loading, auto-orientation
-- `ui/screens/imagetopdf/ImageToPdfScreen.kt` — image list + drag-drop + PDF options card
-- `ui/screens/imagetopdf/ImageToPdfProgressScreen.kt` — shared ViewModel pattern
-- `ui/screens/imagetopdf/ImageToPdfSuccessScreen.kt` — fileName + Open File + Back Home
-
-### Key decisions
-- `PdfOutputQuality` renamed from `ImageQuality` to avoid conflict with existing PDF-to-image enum
-- Quality affects page resolution: ORIGINAL=300DPI (A4: 2480×3508), HIGH=150DPI (1240×1754), MEDIUM=72DPI (595×842)
-- FitMode.FIT: scale to fit, letterbox; FitMode.CROP: scale to fill, clip to margin rect
-- Auto-orientation: when list.size==1 and !orientationIsManual, set portrait/landscape from image aspect ratio
-- Thumbnails: stored as `Map<String, ImageBitmap>` in a separate StateFlow, loaded via loadThumbnail() (API 29+: ContentResolver.loadThumbnail; API 26-28: BitmapFactory + inSampleSize)
-- `queryPdfUri()` extracted as shared helper in NavGraph (both openMergedFile and openImageToPdfFile use it)
-- Output: Documents/EasySmartPDF/Images_yyyy-MM-dd_HH-mm.pdf
-- Navigation: Home → ImageToPdf → ImageToPdfProgress → ImageToPdfSuccess/{fileName} → Home
-
-### HomeScreen compact layout
-- Removed inner Column padding(Spacing.sm) from FeatureCard
-- Icon: 48dp → 28dp
-- Spacer after icon: 16dp → 4dp (Spacing.xs)
-- Title: titleLarge → titleMedium
-- Description: bodyLarge → bodySmall
-- Spacer before button: 16dp → 4dp (Spacing.xs)
-- Card gap: Spacing.md (16dp) → Spacing.sm (8dp)
-- Removed trailing Spacer(xl) at bottom
-- Added `onImageToPdfClick` parameter and Icons.Default.Image icon
-
-## Release Preparation — Completed 2026-06-29
-
-### Files modified
-- `app/build.gradle.kts` — added `signingConfigs { release {} }` reading from `keystore.properties`; `isMinifyEnabled = true`; `isShrinkResources = true`; signingConfig only wired when `keystore.properties` exists
-- `app/proguard-rules.pro` — added: stack trace attributes, Kotlin metadata keep, Coroutines volatile field keeps, enum values()/valueOf() keeps
-- `app/src/main/AndroidManifest.xml` — added `<queries>` block for `ACTION_VIEW / application/pdf` (required on API 30+ to resolve a PDF viewer)
-- `.gitignore` — added `keystore.properties`, `*.jks`, `*.keystore`
-- `keystore.properties.template` — new template file; copy to `keystore.properties` and fill credentials before signing
-
-### Signing workflow (before first release)
-1. Generate keystore: `keytool -genkey -v -keystore easymartpdf-release.jks -keyalg RSA -keysize 2048 -validity 10000 -alias easymartpdf`
-2. Copy `keystore.properties.template` → `keystore.properties` in project root
-3. Fill in `storeFile`, `storePassword`, `keyAlias`, `keyPassword`
-4. Build signed release: `./gradlew assembleRelease` or use Build → Generate Signed APK/Bundle
-
-### Icon status
-- Adaptive icon XML structure: ✅ complete (`mipmap-anydpi-v26/ic_launcher.xml` with background + foreground + monochrome)
-- Fallback WebP bitmaps: ✅ all densities present (mdpi, hdpi, xhdpi, xxhdpi, xxxhdpi)
-- Foreground content: ⚠️ verify that the WebP bitmaps are custom-branded — may still be the default Android Studio placeholder robot icon
-
-## Composable Illustrations — Implementation Details (2026-07-04)
-
-### Motivation
-Replaced 8 combined illustration PNGs (4 LTR + 4 RTL variants) with a single `FeatureIllustration` composable built from two reusable assets: `ic_pdf.png` and `ic_images.png`.
-
-### New file
-`ui/components/FeatureIllustration.kt`:
-- `enum class PdfOperation { PDF_TO_IMAGES, MERGE_PDFS, SPLIT_PDF, IMAGES_TO_PDF }`
-- `@Composable fun FeatureIllustration(operation: PdfOperation)`
-- Layouts: single pair (PDF↔Images) or stacked pair with arrow (Merge/Split)
-- Arrow: `Icons.AutoMirrored.Filled.ArrowForward` — flips automatically in RTL
-- PNGs are never mirrored; Row layout mirrors in RTL via `LocalLayoutDirection`
-- Icon sizes: 48dp (single large), 26dp (stacked pair items), 18dp (arrow)
-
-### Modified files
-- `HomeScreen.kt`: `FeatureCard(imageRes: Int)` → `FeatureCard(illustration: @Composable () -> Unit)`. Removed `isRtl` logic and all old drawable references. Card is now illustration-agnostic.
-
-### Deleted files (8 PNGs)
-`pdf_to_images.png`, `merge_pdfs.png`, `split_pdf.png`, `images_to_pdf.png` and their `_rtl` variants. All replaced by the composable.
-
-### RTL behavior
-In RTL: Row children appear right-to-left; AutoMirrored arrow points left; PNGs are not flipped. No duplicate assets or duplicate screens needed.
-
-## Theme, Localization & RTL — Implementation Details (2026-07-04)
-
-### Dark Theme Fixes (Color.kt)
-- `PrimaryDark` restored to `0xFF455A64` (same brand color as light mode — buttons no longer change color between themes)
-- `OnPrimaryDark` changed to `0xFFFFFFFF` (white text on dark button for proper contrast)
-- `SurfaceDark` changed to `0xFF2C2C2E` (distinctly lighter than `BackgroundDark 0xFF1C1C1E` — cards now visible)
-- `SurfaceVariantDark` changed to `0xFF3C3C3E`
-
-### Localization
-- Added `res/values-fa/strings.xml` with full Persian translations of all strings
-- Fixed hardcoded `"$totalPages pages"` and `"${entry.pageCount} pages"` in `MergePdfScreen.kt` → now use `R.string.pages_count` + `R.string.meta_separator`
-- Added `meta_separator = " • "` string resource for file info lines
-
-### RTL + Language Switching
-- Added `appcompat 1.7.0` dependency
-- `MainActivity` now extends `AppCompatActivity` (safe — `AppCompatActivity` extends `ComponentActivity`)
-- `SettingsViewModel.setLanguage()` now calls `AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(language.localeTag))` after saving to DataStore. On API 33+: instant, no restart. On API 26–32: Activity recreates automatically.
-- RTL drawable selection in `HomeScreen.kt`: `LocalLayoutDirection.current == LayoutDirection.Rtl` picks `*_rtl` variants; LTR uses originals. No screen duplication.
-- RTL drawables confirmed already correctly named: `pdf_to_images_rtl.png`, `merge_pdfs_rtl.png`, `split_pdf_rtl.png`, `images_to_pdf_rtl.png`
-
-### Key constraint
-Language DataStore stores the preference for the Settings screen display. AppCompatDelegate stores it separately for locale application. Both are cleared together if app data is cleared.
-
-## Settings Screen — Implementation Details
-
-### New files
-- `domain/model/AppTheme.kt` — enum: SYSTEM, LIGHT, DARK
-- `domain/model/AppLanguage.kt` — enum: ENGLISH, PERSIAN (displayName, localeTag)
-- `domain/model/UserPreferences.kt` — data class(theme, language)
-- `domain/repository/SettingsRepository.kt` — interface: preferences Flow, setTheme, setLanguage
-- `data/repository/SettingsRepositoryImpl.kt` — DataStore Preferences, keyed by "settings"
-- `ui/screens/settings/SettingsUiState.kt`
-- `ui/screens/settings/SettingsViewModel.kt` — AndroidViewModel, Activity-scoped
-- `ui/screens/settings/SettingsScreen.kt` — Appearance radios, Language dialog, About section
-
-### Modified files
-- `gradle/libs.versions.toml` + `app/build.gradle.kts` — added DataStore 1.1.7, buildConfig = true
-- `ui/theme/Theme.kt` — `appTheme: AppTheme` param replaces `darkTheme: Boolean`
-- `MainActivity.kt` — creates SettingsViewModel via `by viewModels()`, collects theme, passes SettingsViewModel into NavHost
-- `ui/navigation/NavGraph.kt` — added Settings route, accepts settingsViewModel parameter
-- `ui/screens/home/HomeScreen.kt` — added `onSettingsClick` param, settings icon in top bar
-- `app/src/main/res/values/strings.xml` — added all settings strings
-
-### Key constraint: Language switching deferred
-Language preference is persisted but the app locale does not change at runtime.
-Structure (AppLanguage enum with localeTag) is in place for a future step using AppCompatDelegate.setApplicationLocales().
-
-## Illustration Modular Control (2026-07-05)
-
-### Problem
-Illustrations on the Home screen felt visually inconsistent because assets (PDF vs Images) have different internal padding, and stacks (Merge/Split) have different visual weight than single icons. A "one-size-fits-all" constant was not sufficient for precise visual tuning.
-
-### Fix
-Refactored `FeatureIllustration.kt` into a modular system that exposes manual control over every single icon in every card.
-
-Shared private variables in `IllustrationDefaults`:
-- **Card 1 (PDF to Images)**: `Card1_PdfSize`, `Card1_ImagesSize`
-- **Card 2 (Merge PDFs)**: `Card2_PdfStackSize` (inner icons), `Card2_TargetPdfSize`
-- **Card 3 (Split PDF)**: `Card3_SourcePdfSize`, `Card3_PdfStackSize` (inner icons)
-- **Card 4 (Images to PDF)**: `Card4_ImagesSize`, `Card4_PdfSize`
-- **Global**: `GlobalPdfScale`, `GlobalImagesScale` (for padding compensation)
-- **Shared**: `StackOffset`, `ArrowSize`, `SpacingGap`
-
-### Benefit
-The user (developer) can now tune any specific icon in any specific card without affecting others. The architecture remains modular, using a single `IllustrationLayout` and reusable building blocks (`PdfIcon`, `ImagesIcon`, `PdfStack`), but with granular parameterization.
-
-### Modified files
-- `ui/components/FeatureIllustration.kt` only
-
----
-
-## Next Expected Step
-
-1. Create the release keystore using the keytool command above.
-2. Populate `keystore.properties` from the template.
-3. Run `./gradlew assembleRelease` and verify the APK is signed and not too large.
-4. Replace launcher icon foreground with custom branded art (requires a designer).
-5. Add a privacy policy URL (required by Google Play for apps that access storage).
-6. Test Image to PDF on device — add images, create PDF, verify in Documents/EasySmartPDF/.
-7. Fix NavGraph openMergedFile() path if still needed.
-8. Resolve open decisions (data source layer, use case location, Hilt, API 26-28 storage).
-9. Wire language switching using AppCompatDelegate.setApplicationLocales() (API 33+) or manual locale override (API 26–32).
-
-Stop after each step. Wait for review.
+## Development Rule
+**The center of the screen must always remain clean for content focus. Background elements must stay anchored to corners and edges.**

@@ -1,5 +1,6 @@
 package com.masoudnaji.easysmartpdf.ui.screens.home
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -31,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -41,7 +43,7 @@ import com.masoudnaji.easysmartpdf.R
 import com.masoudnaji.easysmartpdf.ui.components.AppCard
 import com.masoudnaji.easysmartpdf.ui.components.FeatureIllustration
 import com.masoudnaji.easysmartpdf.ui.components.PdfOperation
-import com.masoudnaji.easysmartpdf.ui.theme.EasySmartPDFTheme
+import com.masoudnaji.easysmartpdf.ui.theme.PoonelTheme
 import com.masoudnaji.easysmartpdf.ui.theme.Radius
 import com.masoudnaji.easysmartpdf.ui.theme.Spacing
 
@@ -58,9 +60,9 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             Surface(
-                color = MaterialTheme.colorScheme.surface,
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f),
                 modifier = Modifier.fillMaxWidth(),
-                shadowElevation = 1.dp
+                shadowElevation = 0.dp
             ) {
                 Column {
                     Spacer(Modifier.statusBarsPadding())
@@ -70,12 +72,22 @@ fun HomeScreen(
                             .height(52.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = stringResource(R.string.home_title),
-                            style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp),
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(Spacing.xs)
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.ic_logo_icon),
+                                contentDescription = null,
+                                modifier = Modifier.size(28.dp)
+                            )
+                            Text(
+                                text = stringResource(R.string.home_title),
+                                style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp),
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                         IconButton(
                             onClick = onSettingsClick,
                             modifier = Modifier.align(Alignment.CenterEnd)
@@ -90,7 +102,8 @@ fun HomeScreen(
                 }
             }
         },
-        modifier = modifier
+        modifier = modifier,
+        containerColor = Color.Transparent
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -149,8 +162,7 @@ private fun FeatureCard(
     modifier: Modifier = Modifier
 ) {
     AppCard(
-        modifier = modifier.clickable(onClick = onClick),
-        containerColor = Color.White
+        modifier = modifier.clickable(onClick = onClick)
     ) {
         Row(
             modifier = Modifier
@@ -211,7 +223,7 @@ private fun FeatureCard(
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
-    EasySmartPDFTheme {
+    PoonelTheme {
         HomeScreen(
             onCreatePicturesClick = {},
             onMergePdfClick = {},

@@ -1,9 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">EasySmartPDF</string>
+    <string name="app_name">Poonel</string>
 
     <!-- Home Screen -->
-    <string name="home_title">EasySmartPDF</string>
-    <string name="feature_pdf_to_images_title">PDF ▶ Images</string>
+    <string name="home_title">Poonel</string>
+    <string name="feature_pdf_to_images_title">PDF → Images</string>
     <string name="feature_pdf_to_images_desc">Convert every page of a PDF into images.</string>
     <string name="feature_pdf_to_images_action">Convert</string>
 
@@ -15,7 +16,7 @@
     <string name="feature_split_pdf_desc">Extract pages or split a PDF into separate files.</string>
     <string name="feature_split_pdf_action">Split</string>
 
-    <string name="feature_images_to_pdf_title">Images ▶ PDF</string>
+    <string name="feature_images_to_pdf_title">Images → PDF</string>
     <string name="feature_images_to_pdf_desc">Turn your images into a single PDF.</string>
     <string name="feature_images_to_pdf_action">Create</string>
 
@@ -98,7 +99,7 @@
     <string name="split_output_separate_pdfs">Separate PDFs</string>
     <string name="split_success_files_count">%1$d PDF files created</string>
     <string name="split_success_folder">Saved in %1$s</string>
-    <string name="split_success_single_location">Saved in Documents/EasySmartPDF/Split</string>
+    <string name="split_success_single_location">Saved in Documents/Poonel/Split</string>
 
     <!-- Image to PDF Screen -->
     <string name="feature_image_to_pdf_desc">Turn your images into a PDF.</string>
@@ -161,5 +162,7 @@
     <string name="settings_about_app_name">App</string>
     <string name="settings_about_version">Version</string>
     <string name="settings_about_privacy_policy">Privacy Policy</string>
-    <string name="settings_about_coming_soon">Coming soon</string>
+    <string name="settings_about_support">Support</string>
+    <string name="settings_about_support_email">support@poonel.app</string>
+    <string name="logo_content_description">Poonel Logo</string>
 </resources>

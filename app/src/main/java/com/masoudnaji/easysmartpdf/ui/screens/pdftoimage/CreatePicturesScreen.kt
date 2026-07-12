@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -46,6 +47,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -59,7 +61,7 @@ import com.masoudnaji.easysmartpdf.domain.model.ImageQuality
 import com.masoudnaji.easysmartpdf.ui.components.AppCard
 import com.masoudnaji.easysmartpdf.ui.components.PrimaryButton
 import com.masoudnaji.easysmartpdf.ui.components.SecondaryButton
-import com.masoudnaji.easysmartpdf.ui.theme.EasySmartPDFTheme
+import com.masoudnaji.easysmartpdf.ui.theme.PoonelTheme
 import com.masoudnaji.easysmartpdf.ui.theme.Radius
 import com.masoudnaji.easysmartpdf.ui.theme.Spacing
 
@@ -144,7 +146,7 @@ fun CreatePicturesScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f)
                 )
             )
         },
@@ -157,10 +159,13 @@ fun CreatePicturesScreen(
                     onNavigateToProgress()
                 },
                 enabled = uiState.pdfInfo != null && !isConverting,
-                modifier = Modifier.padding(Spacing.lg)
+                modifier = Modifier
+                    .navigationBarsPadding()
+                    .padding(Spacing.lg)
             )
         },
-        modifier = modifier
+        modifier = modifier,
+        containerColor = Color.Transparent
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -386,7 +391,7 @@ private fun PageRangeControl(
 @Preview(showBackground = true)
 @Composable
 fun CreatePicturesScreenPreview() {
-    EasySmartPDFTheme {
+    PoonelTheme {
         CreatePicturesScreen(onBackClick = {}, onNavigateToProgress = {})
     }
 }

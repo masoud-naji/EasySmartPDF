@@ -21,7 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.masoudnaji.easysmartpdf.R
-import com.masoudnaji.easysmartpdf.ui.theme.EasySmartPDFTheme
+import com.masoudnaji.easysmartpdf.ui.theme.PoonelTheme
 
 /**
  * Manually control every icon size in every card here.
@@ -162,7 +162,7 @@ private fun IllustrationArrow() {
 @Preview(showBackground = true)
 @Composable
 private fun FeatureIllustrationPreview() {
-    EasySmartPDFTheme {
+    PoonelTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
