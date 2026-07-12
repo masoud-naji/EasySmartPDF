@@ -186,4 +186,14 @@
     <string name="single_page_editor_title">ویرایش صفحه</string>
     <string name="single_page_editor_apply">اعمال</string>
     <string name="single_page_editor_fine_rotation">چرخش دقیق: %1$.1f°</string>
+
+    <!-- PDF Edit Feature -->
+    <string name="pdf_edit_title">ویرایش PDF</string>
+    <string name="feature_pdf_edit_desc">صفحات را مرتب‌سازی، چرخش یا حذف کنید.</string>
+    <string name="feature_pdf_edit_action">ویرایش</string>
+    <string name="pdf_edit_edit_pages">ویرایش صفحات</string>
+    <string name="pdf_edit_save_action">ذخیره PDF</string>
+    <string name="pdf_edit_cancel_dialog_title">ذخیره‌سازی متوقف شود؟</string>
+    <string name="pdf_edit_success_message">PDF ویرایش‌شده ذخیره شد.</string>
+    <string name="pdf_edit_progress_saving">ذخیره صفحه %1$d…</string>
 </resources>

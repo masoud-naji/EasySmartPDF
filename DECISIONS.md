@@ -176,3 +176,22 @@ Users need to fine-tune individual page rotation (±45°) in addition to 90° sn
 - `PageThumbnailCard` updated: `combinedClickable` (tap = open editor, long press = zoom); rotation preview shows `rotation + fineRotation`.
 ### Status
 Accepted
+
+---
+
+## 2026-07-12 (Phase 3: Standalone PDF Editor)
+### Decision
+Add a standalone PDF Editor feature accessible from the home screen. Reuses `PageOrganizerScreen`, `PageEditorScreen`, and `PageOperationsDelegate` without duplicating any logic.
+### Reason
+Phase 3 validates that the reusable architecture from Phases 0–2 can be wired to an entirely different feature entry point. The user gets a dedicated tool for editing a single PDF (reorder/rotate/delete/fine-rotate pages, then save).
+### Implementation
+- `PdfEditViewModel`: composes `PageOperationsDelegate` + `MergePdfUseCase` (reused) for page management and the save pipeline. Pattern mirrors `MergePdfViewModel` but scoped to a single-file flow. `buildOutputFileName()` prefixes output with "Edited_".
+- `PdfEditUiState` + `PdfEditSaveState` defined locally in the `pdfedit` package; no cross-feature state dependencies.
+- `PdfEditScreen`: single-file selector with "Edit Pages" CTA; enabled only when metadata has loaded.
+- `PdfEditProgressScreen` + `PdfEditSuccessScreen`: identical pattern to Merge counterparts, wired to `PdfEditViewModel`.
+- NavGraph: adds five new routes (`pdf_edit`, `pdf_edit_page_organizer`, `pdf_edit_page_editor/{pageIndex}`, `pdf_edit_progress`, `pdf_edit_success/{fileName}`). `pdf_edit_page_organizer` and `pdf_edit_page_editor` resolve `PdfEditViewModel` from `pdf_edit` back stack entry — same scoping pattern as Merge.
+- `PageOrganizerScreen` reused with `ctaText = "Save PDF"`. `PageEditorScreen` reused with `PdfEditViewModel.updatePage()` as the apply callback.
+- `PdfOperation.PDF_EDIT` added to `FeatureIllustration`. Home screen gains `onPdfEditClick` callback.
+- Zero changes to any existing Merge, Split, or Image-to-PDF code.
+### Status
+Accepted

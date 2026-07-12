@@ -54,6 +54,7 @@ fun HomeScreen(
     onMergePdfClick: () -> Unit,
     onSplitPdfClick: () -> Unit,
     onImageToPdfClick: () -> Unit,
+    onPdfEditClick: () -> Unit,
     onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -147,6 +148,14 @@ fun HomeScreen(
                 onClick = onImageToPdfClick
             )
 
+            FeatureCard(
+                title = stringResource(R.string.pdf_edit_title),
+                description = stringResource(R.string.feature_pdf_edit_desc),
+                actionText = stringResource(R.string.feature_pdf_edit_action),
+                illustration = { FeatureIllustration(PdfOperation.PDF_EDIT) },
+                onClick = onPdfEditClick
+            )
+
             Spacer(modifier = Modifier.height(Spacing.xl))
         }
     }
@@ -229,6 +238,7 @@ fun HomeScreenPreview() {
             onMergePdfClick = {},
             onSplitPdfClick = {},
             onImageToPdfClick = {},
+            onPdfEditClick = {},
             onSettingsClick = {}
         )
     }

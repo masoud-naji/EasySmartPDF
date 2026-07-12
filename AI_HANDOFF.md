@@ -129,8 +129,21 @@ Changed files:
 - `data/repository/MergeRepositoryImpl.kt` — applies `fineRotation` in matrix transform
 - `res/values/strings.xml` + `values-fa/strings.xml` — added `single_page_editor_*` strings
 
-### Phase 3 — PENDING
-Create `PdfEditScreen` + `PdfEditViewModel`. Wire PDF Editor tool end-to-end.
+### Phase 3 — COMPLETE (2026-07-12)
+Standalone PDF Editor: pick one PDF, edit pages, save as new file.
+
+New files:
+- `ui/screens/pdfedit/PdfEditUiState.kt` — state + `PdfEditSaveState` sealed interface
+- `ui/screens/pdfedit/PdfEditViewModel.kt` — composes `PageOperationsDelegate` + `MergePdfUseCase`
+- `ui/screens/pdfedit/PdfEditScreen.kt` — single file selector
+- `ui/screens/pdfedit/PdfEditProgressScreen.kt` — save progress
+- `ui/screens/pdfedit/PdfEditSuccessScreen.kt` — save success
+
+Changed files:
+- `ui/components/FeatureIllustration.kt` — added `PdfOperation.PDF_EDIT`
+- `ui/screens/home/HomeScreen.kt` — added `onPdfEditClick` + PDF Editor card
+- `ui/navigation/NavGraph.kt` — five new routes; all screens reused via NavGraph wiring
+- `res/values/strings.xml` + `values-fa/strings.xml` — `pdf_edit_*` strings
 
 ---
 
