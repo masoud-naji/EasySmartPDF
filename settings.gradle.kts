@@ -22,6 +22,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "EasySmartPDF"
+rootProject.name = "ApisPDF"
 include(":app")
  

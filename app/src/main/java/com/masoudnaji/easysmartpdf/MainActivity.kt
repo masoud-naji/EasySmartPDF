@@ -8,9 +8,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.navigation.compose.rememberNavController
-import com.masoudnaji.easysmartpdf.ui.navigation.EasySmartNavHost
+import com.masoudnaji.easysmartpdf.ui.navigation.PoonelNavHost
 import com.masoudnaji.easysmartpdf.ui.screens.settings.SettingsViewModel
-import com.masoudnaji.easysmartpdf.ui.theme.EasySmartPDFTheme
+import com.masoudnaji.easysmartpdf.ui.theme.PoonelTheme
 
 class MainActivity : AppCompatActivity() {
 
@@ -21,9 +21,9 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContent {
             val prefs by settingsViewModel.preferences.collectAsState()
-            EasySmartPDFTheme(appTheme = prefs.theme) {
+            PoonelTheme(appTheme = prefs.theme) {
                 val navController = rememberNavController()
-                EasySmartNavHost(
+                PoonelNavHost(
                     navController = navController,
                     settingsViewModel = settingsViewModel
                 )

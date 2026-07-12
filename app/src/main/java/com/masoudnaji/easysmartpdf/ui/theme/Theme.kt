@@ -17,10 +17,16 @@ private val DarkColorScheme = darkColorScheme(
     onPrimary = OnPrimaryDark,
     primaryContainer = PrimaryContainerDark,
     onPrimaryContainer = OnPrimaryContainerDark,
+    secondary = SecondaryDark,
+    onSecondary = OnSecondaryDark,
+    tertiary = TertiaryDark,
+    onTertiary = OnTertiaryDark,
     background = BackgroundDark,
     surface = SurfaceDark,
     onSurface = OnSurfaceDark,
-    surfaceVariant = SurfaceVariantDark
+    surfaceVariant = SurfaceVariantDark,
+    onSurfaceVariant = OnSurfaceVariantDark,
+    outline = OnSurfaceVariantDark
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -28,14 +34,20 @@ private val LightColorScheme = lightColorScheme(
     onPrimary = OnPrimaryLight,
     primaryContainer = PrimaryContainerLight,
     onPrimaryContainer = OnPrimaryContainerLight,
+    secondary = SecondaryLight,
+    onSecondary = OnSecondaryLight,
+    tertiary = TertiaryLight,
+    onTertiary = OnTertiaryLight,
     background = BackgroundLight,
     surface = SurfaceLight,
     onSurface = OnSurfaceLight,
-    surfaceVariant = SurfaceVariantLight
+    surfaceVariant = SurfaceVariantLight,
+    onSurfaceVariant = OnSurfaceVariantLight,
+    outline = OnSurfaceVariantLight
 )
 
 @Composable
-fun EasySmartPDFTheme(
+fun PoonelTheme(
     appTheme: AppTheme = AppTheme.SYSTEM,
     content: @Composable () -> Unit
 ) {

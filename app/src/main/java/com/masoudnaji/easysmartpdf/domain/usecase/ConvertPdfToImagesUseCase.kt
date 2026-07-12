@@ -19,7 +19,7 @@ class ConvertPdfToImagesUseCase(
         val total = pageIndices.size
         val savedUris = mutableListOf<android.net.Uri>()
 
-        val relativeFolder = "Pictures/EasySmartPDF/${config.folderName}"
+        val relativeFolder = "Pictures/Poonel/${config.folderName}"
         pdfRepository.renderPages(
             uri = config.pdfUri,
             pageIndices = pageIndices,

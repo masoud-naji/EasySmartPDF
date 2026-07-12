@@ -4,7 +4,7 @@ Refer to `PROJECT_RULES.md` as the single source of truth.
 
 ## Role
 
-You are the Implementation Specialist for EasySmartPDF.
+You are the Implementation Specialist for ApisPDF.
 
 Your focus is:
 

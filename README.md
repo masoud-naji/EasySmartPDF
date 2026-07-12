@@ -1,20 +1,20 @@
-# EasySmartPDF
+# Poonel
 
 <p align="center">
-  <img src="docs/images/logo.png" width="140" alt="EasySmartPDF Logo">
+  <img src="app/src/main/res/drawable/ic_logo_full.png" width="240" alt="Poonel Logo">
 </p>
 
 <h3 align="center">
-The easiest PDF utility for Android.
+Smart PDF Tools
 </h3>
 
 ---
 
 ## Philosophy
 
-EasySmartPDF is **not** trying to become the biggest PDF application.
+Poonel is **not** trying to become the biggest PDF application.
 
-It is designed to become the **easiest** PDF utility for everyday users.
+It is designed to become the **easiest** and most **premium** PDF utility for everyday users.
 
 Every feature is evaluated using one simple question:
 
@@ -35,16 +35,16 @@ As a result they become:
 - full of technical language
 - frustrating for non-technical users
 
-EasySmartPDF takes the opposite approach.
+Poonel takes the opposite approach.
 
-The goal is to provide only the features people actually use, wrapped inside a clean, calm and approachable interface.
+The goal is to provide only the features people actually use, wrapped inside a clean, modern, and architectural interface.
 
 The application is designed for everyone, including:
 
 - First-time Android users
 - Elderly users
 - Users with limited technical experience
-- Anyone who simply wants to get a PDF task done quickly
+- Anyone who simply wants a professional-grade experience with zero learning curve
 
 ---
 
@@ -53,13 +53,24 @@ The application is designed for everyone, including:
 - Simplicity over feature count
 - One obvious action per screen
 - Friendly, non-technical language
+- Architectural, premium design identity
 - Accessibility first
-- Calm and minimal UI
+- Clean center for focus
 - Large touch targets
-- Large readable typography
 - Consistent design system
 - Predictable user experience
 - Reliability before adding new features
+
+---
+
+# Design System (The "Poonel" Look)
+
+Poonel features a unique **architectural geometric identity**:
+
+- **Honey & Charcoal Palette**: A sophisticated mix of Honey Gold (`#E9A600`) and Charcoal (`#263238`).
+- **Geometric Background**: An intentional, structured honeycomb network implemented in code (not images) for perfect scaling.
+- **Modern Layering**: Subtle "glass" effects on top bars and cards to create depth without distraction.
+- **Clean Center Focus**: Design elements are anchored to edges and corners, keeping the workspace clear for user content.
 
 ---
 
@@ -68,104 +79,9 @@ The application is designed for everyone, including:
 | Feature | Status |
 |----------|--------|
 | PDF → Images | ✅ Stable |
-| Merge PDF | ✅ In Progress |
-| Split PDF | 🚧 Under Development |
-
----
-
-# Planned Features
-
-## Phase 2
-
-- Image → PDF
-- Scan → PDF
-- OCR (Extract Text)
-
-## Future Ideas
-
-- Sign PDF
-- Fill PDF Forms
-- Password Protection
-- Watermark
-- Rotate Pages
-- Reorder Pages
-- Extract Images
-- Delete Pages
-
-Only features that improve usability will be added.
-
----
-
-# Architecture
-
-```
-                 EasySmartPDF
-
-                      │
-
-          ┌───────────┼───────────┐
-          │           │           │
-
-      PDF to       Merge      Split
-      Images        PDF         PDF
-
-          │           │           │
-
-      Select      Select      Select
-       PDF        PDFs         PDF
-
-          │           │           │
-
-     Configure    Reorder     Select Pages
-
-          │           │           │
-
-       Progress    Progress    Progress
-
-          │           │           │
-
-       Success     Success     Success
-
-────────────────────────────────────────
-
-Upcoming
-
-Image → PDF
-
-Scan → PDF
-
-OCR
-```
-
----
-
-# Application Architecture
-
-```
-                 UI (Compose)
-
-                      │
-
-                 ViewModel
-
-                      │
-
-                  UseCases
-
-                      │
-
-             Repository Layer
-
-          ┌───────────┴───────────┐
-
-      PDF Repository       Image Repository
-
-          └───────────┬───────────┘
-
-              Android Platform APIs
-
-        PdfRenderer • MediaStore • SAF
-```
+| Merge PDF | ✅ Stable |
+| Split PDF | ✅ Stable |
+| Images → PDF | ✅ Stable |
 
 ---
 
@@ -175,138 +91,89 @@ OCR
 com.masoudnaji.easysmartpdf
 
 ├── data
-│   ├── repository
-│   └── source
+│   └── repository (PdfRenderer, MediaStore, IO logic)
 │
 ├── domain
-│   ├── model
-│   ├── repository
-│   └── usecase
+│   ├── model (Core entities and enums)
+│   ├── repository (Interfaces)
+│   └── usecase (Feature-specific logic)
 │
 ├── ui
-│   ├── components
-│   ├── navigation
-│   ├── screens
-│   └── theme
+│   ├── components (Design System, Custom Background, Cards)
+│   ├── navigation (Compose Navigation Graph)
+│   ├── screens (Feature screens & ViewModels)
+│   └── theme (Colors, Typography, Shapes)
 │
-├── util
-│
-└── di
+└── util (File helpers, formatting)
 ```
 
 ---
 
 # Roadmap
 
-## Phase 1
+## Phase 1 (Completed)
 
-✅ PDF → Images
+✅ **Core Tools**: PDF to Images, Merge PDF, Split PDF, Images to PDF.
 
-✅ Merge PDF
+✅ **Design System**: Poonel Premium Branding with Geometric Background.
 
-🚧 Split PDF
+✅ **User Settings**: Theme (Dark/Light) and Language support.
 
 ---
 
-## Phase 2
+## Phase 2 (Planned)
 
-⬜ Image → PDF
+⬜ **Scanner**: High-quality document scanning.
 
-⬜ Scan → PDF
+⬜ **OCR**: Extract text from documents.
 
-⬜ OCR
+⬜ **Compress**: Reduce PDF file size.
 
 ---
 
 ## Phase 3
 
-⬜ Sign PDF
+⬜ **Sign PDF**: Simple electronic signatures.
 
-⬜ Fill PDF Forms
+⬜ **Fill PDF Forms**: Easy form filling.
 
-⬜ Password Protection
-
-⬜ Watermark
+⬜ **Password Protection**: Encrypt documents.
 
 ---
 
 # Tech Stack
 
-### Language
-
-- Kotlin
-
-### UI
-
-- Jetpack Compose
-- Material 3
-
-### Architecture
-
-- MVVM
-- StateFlow
-- Kotlin Coroutines
-
-### Android
-
-- Navigation Compose
-- Activity Result API
-- MediaStore
-- Scoped Storage
-- PdfRenderer
-
-### Dependency Injection
-
-- Hilt (planned)
-
----
-
-# Design Goals
-
-EasySmartPDF should feel:
-
-- Calm
-- Clean
-- Fast
-- Friendly
-- Predictable
-
-The user should never feel overwhelmed.
-
-Every screen should answer only one question.
+- **Language**: Kotlin
+- **UI**: Jetpack Compose & Material 3
+- **Async**: Coroutines & StateFlow
+- **Navigation**: Compose Navigation
+- **Architecture**: MVVM + Clean Architecture layering
+- **Native APIs**: PdfRenderer, MediaStore, Scoped Storage
 
 ---
 
 # Development Principles
 
-- Clean Architecture
-- Small reusable components
-- Simple code over clever code
-- Testable business logic
-- Progressive enhancement
-- Memory-efficient PDF processing
-- Large file support
-- Accessibility-first development
+- **Zero Performance Impact**: Geometric backgrounds are drawn procedurally with `Canvas`.
+- **Memory Efficient**: Incremental page processing for large PDFs.
+- **Security**: No third-party PDF SDKs; uses native Android `PdfRenderer`.
+- **Privacy**: No external servers; all processing happens locally on your device.
 
 ---
 
 # AI-Assisted Development
 
-This project is developed collaboratively using multiple AI assistants.
+This project is developed collaboratively using multiple AI assistants. Project knowledge is maintained through:
 
-Project knowledge is maintained through:
+- `PROJECT_RULES.md`
+- `AI_HANDOFF.md`
+- `DECISIONS.md`
+- `ARCHITECTURE.md`
 
-- PROJECT_RULES.md
-- AI_HANDOFF.md
-- DECISIONS.md
+This allows for consistent, rapid development while maintaining high code quality.
 
-This allows development to continue consistently across sessions while keeping prompts small and focused.
-
----
-
-# Screenshots
-
-Coming soon.
+- **Privacy Policy**: [https://poonel.app/privacy](https://poonel.app/privacy)
+- **Support**: [support@poonel.app](mailto:support@poonel.app)
 
 ---
 

@@ -18,7 +18,7 @@ import com.masoudnaji.easysmartpdf.ui.theme.ButtonDimens
 import com.masoudnaji.easysmartpdf.ui.theme.Radius
 
 /**
- * Primary Button for EasySmartPDF.
+ * Primary Button for ApisPDF.
  * Height: 64dp (default), Rounded corners, Full width by default.
  */
 @Composable
@@ -48,7 +48,7 @@ fun PrimaryButton(
 }
 
 /**
- * Secondary Button for EasySmartPDF.
+ * Secondary Button for ApisPDF.
  * Outlined, Height: 64dp.
  */
 @Composable
@@ -71,7 +71,7 @@ fun SecondaryButton(
 }
 
 /**
- * Text Button for EasySmartPDF.
+ * Text Button for ApisPDF.
  * Used for low-priority actions like "Done" or "Dismiss".
  */
 @Composable
