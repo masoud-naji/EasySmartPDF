@@ -98,8 +98,17 @@ New files:
 Changed files:
 - `MergePdfViewModel.kt` — now composes `PageOperationsDelegate`; internal state split into `_fileState` (file selection + merge) + `delegate.state` (pages); combined via `combine().stateIn()` into same `MergePdfUiState` shape
 
-### Phase 1 — PENDING
-Generalize `MergePageEditorScreen` → `PageOrganizerScreen` (pure composable). Update NavGraph route.
+### Phase 1 — COMPLETE (2026-07-12)
+Generalized `MergePageEditorScreen` → `PageOrganizerScreen` (pure composable). Updated NavGraph route `merge_page_editor` → `page_organizer`.
+
+New files:
+- `ui/screens/pageorganizer/PageOrganizerScreen.kt` — pure composable, no ViewModel imports
+
+Deleted files:
+- `ui/screens/merge/MergePageEditorScreen.kt`
+
+Changed files:
+- `ui/navigation/NavGraph.kt` — `Screen.MergePageEditor` → `Screen.PageOrganizer`; NavGraph entry now resolves `MergePdfViewModel` and passes all state + lambdas to `PageOrganizerScreen`
 
 ### Phase 2 — PENDING
 Create `PageEditorScreen` + `PageEditorViewModel` for per-page fine editing (fine rotate, crop).

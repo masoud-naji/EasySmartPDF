@@ -19,15 +19,22 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.masoudnaji.easysmartpdf.R
 import com.masoudnaji.easysmartpdf.ui.components.PoonelBackground
 import com.masoudnaji.easysmartpdf.ui.screens.home.HomeScreen
 import com.masoudnaji.easysmartpdf.ui.screens.imagetopdf.ImageToPdfProgressScreen
 import com.masoudnaji.easysmartpdf.ui.screens.imagetopdf.ImageToPdfScreen
 import com.masoudnaji.easysmartpdf.ui.screens.imagetopdf.ImageToPdfSuccessScreen
-import com.masoudnaji.easysmartpdf.ui.screens.merge.MergePageEditorScreen
 import com.masoudnaji.easysmartpdf.ui.screens.merge.MergePdfScreen
+import com.masoudnaji.easysmartpdf.ui.screens.merge.MergePdfViewModel
 import com.masoudnaji.easysmartpdf.ui.screens.merge.MergeProgressScreen
 import com.masoudnaji.easysmartpdf.ui.screens.merge.MergeSuccessScreen
+import com.masoudnaji.easysmartpdf.ui.screens.pageorganizer.PageOrganizerScreen
 import com.masoudnaji.easysmartpdf.ui.screens.pdftoimage.CreatePicturesScreen
 import com.masoudnaji.easysmartpdf.ui.screens.progress.ProgressScreen
 import com.masoudnaji.easysmartpdf.ui.screens.settings.SettingsScreen
@@ -44,7 +51,7 @@ object Screen {
     const val Progress = "progress"
     const val SuccessRoute = "success/{savedCount}/{folderName}"
     const val MergePdf = "merge_pdf"
-    const val MergePageEditor = "merge_page_editor"
+    const val PageOrganizer = "page_organizer"
     const val MergeProgress = "merge_progress"
     const val MergeSuccessRoute = "merge_success/{fileName}"
     const val SplitPdf = "split_pdf"
@@ -145,18 +152,40 @@ fun PoonelNavHost(
             composable(Screen.MergePdf) {
                 MergePdfScreen(
                     onBackClick = { navController.popBackStack() },
-                    onNavigateToPageEditor = { navController.navigate(Screen.MergePageEditor) }
+                    onNavigateToPageEditor = { navController.navigate(Screen.PageOrganizer) }
                 )
             }
 
-            composable(Screen.MergePageEditor) { backStackEntry ->
+            composable(Screen.PageOrganizer) { backStackEntry ->
                 val mergePdfEntry = remember(backStackEntry) {
                     navController.getBackStackEntry(Screen.MergePdf)
                 }
-                MergePageEditorScreen(
-                    mergePdfEntry = mergePdfEntry,
+                val vm: MergePdfViewModel = viewModel(mergePdfEntry)
+                val state by vm.uiState.collectAsState()
+                val pageCount = state.pages.size
+                PageOrganizerScreen(
+                    pages = state.pages,
+                    thumbnailsLoaded = state.thumbnailsLoaded,
+                    thumbnailsTotal = state.thumbnailsTotal,
+                    zoomedPageId = state.zoomedPageId,
+                    errorMessage = state.errorMessage,
+                    ctaText = if (pageCount > 0)
+                        pluralStringResource(R.plurals.page_editor_merge_action, pageCount, pageCount)
+                    else
+                        stringResource(R.string.merge_action),
+                    onLoad = vm::loadPageThumbnails,
                     onBackClick = { navController.popBackStack() },
-                    onNavigateToProgress = { navController.navigate(Screen.MergeProgress) }
+                    onRotateLeft = { pageId -> vm.rotatePage(pageId, clockwise = false) },
+                    onRotateRight = { pageId -> vm.rotatePage(pageId, clockwise = true) },
+                    onDelete = vm::deletePage,
+                    onMove = vm::movePage,
+                    onPageClick = vm::setZoomedPage,
+                    onZoomDismiss = { vm.setZoomedPage(null) },
+                    onErrorShown = vm::onErrorDismissed,
+                    onConfirm = {
+                        vm.startMerge()
+                        navController.navigate(Screen.MergeProgress)
+                    }
                 )
             }
 

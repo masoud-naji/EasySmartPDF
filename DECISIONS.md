@@ -143,3 +143,17 @@ MergePdfViewModel mixed three unrelated concerns: file selection, page managemen
 - `PageOrganizerState` is a new domain model: pages, thumbnailsLoaded, thumbnailsTotal, zoomedPageId.
 ### Status
 Accepted
+
+---
+
+## 2026-07-12 (Phase 1: PageOrganizerScreen)
+### Decision
+Generalize `MergePageEditorScreen` into a reusable `PageOrganizerScreen` (pure composable) in a new `ui/screens/pageorganizer/` package. Delete `MergePageEditorScreen`. Rename nav route `merge_page_editor` → `page_organizer`.
+### Reason
+The screen has no feature-specific code — all wiring (ViewModel, callbacks, CTA text) is done in the NavGraph entry. Any future caller (PdfEdit, Scanner) adds one composable block in NavGraph with no changes to the screen itself.
+### Implementation
+- `PageOrganizerScreen` takes all state and callbacks as parameters; no ViewModel or navigation imports.
+- NavGraph entry for `page_organizer` resolves `MergePdfViewModel` from the `merge_pdf` back stack entry and passes all state + lambdas down.
+- Merge PDF behavior is 100% unchanged.
+### Status
+Accepted
