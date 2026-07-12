@@ -84,12 +84,36 @@ passing their own `List<PageItem>` and calling `PageEditorRepository` directly.
 
 ---
 
+## Reusable Page Editing Architecture (In Progress)
+
+A multi-phase refactor to make Page Organizer and Page Editor fully reusable across all features.
+
+### Phase 0 — COMPLETE (2026-07-12)
+Extracted `PageOperationsDelegate` from `MergePdfViewModel`. App behavior unchanged.
+
+New files:
+- `domain/model/PageOrganizerState.kt` — pages + thumbnail progress + zoom state
+- `ui/screens/pageorganizer/PageOperationsDelegate.kt` — rotate, delete, reorder, thumbnail loading, bitmap lifecycle
+
+Changed files:
+- `MergePdfViewModel.kt` — now composes `PageOperationsDelegate`; internal state split into `_fileState` (file selection + merge) + `delegate.state` (pages); combined via `combine().stateIn()` into same `MergePdfUiState` shape
+
+### Phase 1 — PENDING
+Generalize `MergePageEditorScreen` → `PageOrganizerScreen` (pure composable). Update NavGraph route.
+
+### Phase 2 — PENDING
+Create `PageEditorScreen` + `PageEditorViewModel` for per-page fine editing (fine rotate, crop).
+
+### Phase 3 — PENDING
+Create `PdfEditScreen` + `PdfEditViewModel`. Wire PDF Editor tool end-to-end.
+
+---
+
 ## Known TODOs / Next Steps
 1. **Language Switching**: Finalize the runtime locale override for Persian/English.
 2. **Permissions**: Request `WRITE_EXTERNAL_STORAGE` on API 26-28.
-3. **Page Editor Reuse**: Apply the same Page Editor to Split PDF and Images to PDF flows.
-4. **Scanner (Phase 2)**: Implementation of document scanning.
-5. **OCR (Phase 2)**: Text extraction from PDF/Images.
+3. **Scanner (Phase 2)**: Implementation of document scanning.
+4. **OCR (Phase 2)**: Text extraction from PDF/Images.
 
 ---
 

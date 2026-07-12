@@ -129,3 +129,17 @@ MergePdfViewModel is shared between MergePdfScreen and MergePageEditorScreen by 
 The file-selection state and page-editor state belong to the same user session. Sharing one ViewModel avoids inter-ViewModel communication complexity. Standard Compose Navigation pattern — no new infrastructure needed.
 ### Status
 Accepted
+
+---
+
+## 2026-07-12 (Phase 0: PageOperationsDelegate)
+### Decision
+Extract all page operation logic (thumbnail loading, rotate, delete, reorder, zoom, bitmap lifecycle) from MergePdfViewModel into a standalone `PageOperationsDelegate` class.
+### Reason
+MergePdfViewModel mixed three unrelated concerns: file selection, page management, and merge execution. The delegate isolates the page management concern so future ViewModels (PdfEditViewModel, ScannerViewModel) can compose it without duplicating code. MergePdfViewModel now owns only file selection and merge execution; it delegates all page ops to the composed delegate.
+### Implementation
+- `PageOperationsDelegate` holds `StateFlow<PageOrganizerState>` internally.
+- `MergePdfViewModel` combines `_fileState` + `delegate.state` via `combine().stateIn()` to produce the same `MergePdfUiState` shape — zero changes to any screen or navigation.
+- `PageOrganizerState` is a new domain model: pages, thumbnailsLoaded, thumbnailsTotal, zoomedPageId.
+### Status
+Accepted
