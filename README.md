@@ -82,6 +82,7 @@ Poonel features a unique **architectural geometric identity**:
 | Merge PDF | ✅ Stable |
 | Split PDF | ✅ Stable |
 | Images → PDF | ✅ Stable |
+| Edit PDF | ✅ Stable |
 
 ---
 
@@ -111,17 +112,19 @@ com.masoudnaji.easysmartpdf
 
 # Roadmap
 
-## Phase 1 (Completed)
+## Completed
 
-✅ **Core Tools**: PDF to Images, Merge PDF, Split PDF, Images to PDF.
+✅ **Core Tools**: PDF to Images, Merge PDF, Split PDF, Images to PDF, Edit PDF.
+
+✅ **Page Editing**: Reorder, rotate (90° snap + fine rotation ±45°), delete, and zoom pages before merging or saving.
 
 ✅ **Design System**: Poonel Premium Branding with Geometric Background.
 
-✅ **User Settings**: Theme (Dark/Light) and Language support.
+✅ **User Settings**: Theme (Dark/Light) and Language support (English + Farsi).
 
 ---
 
-## Phase 2 (Planned)
+## Planned
 
 ⬜ **Scanner**: High-quality document scanning.
 
@@ -129,13 +132,7 @@ com.masoudnaji.easysmartpdf
 
 ⬜ **Compress**: Reduce PDF file size.
 
----
-
-## Phase 3
-
 ⬜ **Sign PDF**: Simple electronic signatures.
-
-⬜ **Fill PDF Forms**: Easy form filling.
 
 ⬜ **Password Protection**: Encrypt documents.
 

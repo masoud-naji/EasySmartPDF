@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.Matrix
 import android.graphics.pdf.PdfDocument
 import android.graphics.pdf.PdfRenderer
 import android.net.Uri
@@ -12,6 +13,7 @@ import android.provider.MediaStore
 import android.util.Log
 import com.masoudnaji.easysmartpdf.domain.model.MergeConfig
 import com.masoudnaji.easysmartpdf.domain.model.MergeEvent
+import com.masoudnaji.easysmartpdf.domain.model.PageItem
 import com.masoudnaji.easysmartpdf.domain.repository.MergeRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -23,76 +25,86 @@ class MergeRepositoryImpl(private val context: Context) : MergeRepository {
 
     companion object {
         private const val TAG = "MergeRepo"
-        // MediaStore.Files only allows Download or Documents as the root directory
         private const val OUTPUT_RELATIVE_PATH = "Documents/Poonel"
     }
 
     override fun mergePdfs(config: MergeConfig): Flow<MergeEvent> = flow {
         emit(MergeEvent.Started)
-        Log.d(TAG, "=== Merge started. ${config.pdfUris.size} files → ${config.outputFileName} ===")
-
-        // Step 1: Count total pages (each call gets its own file descriptor)
-        val pageCounts = config.pdfUris.mapIndexed { idx, uri ->
-            Log.d(TAG, "Counting pages [$idx]: $uri")
-            // Do NOT use pfd.use here — PdfRenderer takes ownership of the pfd and closes it
-            val pfd = context.contentResolver.openFileDescriptor(uri, "r")
-            if (pfd == null) {
-                Log.e(TAG, "Cannot open file descriptor [$idx]")
-                return@mapIndexed 0
-            }
-            val count = PdfRenderer(pfd).use { it.pageCount }
-            Log.d(TAG, "  → $count pages")
-            count
-        }
-        val totalPages = pageCounts.sum()
-        Log.d(TAG, "Total pages to merge: $totalPages")
-        check(totalPages > 0) { "No readable pages found across all source PDFs" }
+        val total = config.pages.size
+        Log.d(TAG, "=== Merge started. $total pages → ${config.outputFileName} ===")
+        check(total > 0) { "No pages to merge" }
 
         val document = PdfDocument()
-        var pageNumber = 1
+        var outputPageNumber = 1
         var processed = 0
 
         try {
-            config.pdfUris.forEachIndexed { fileIndex, uri ->
-                Log.d(TAG, "Opening source PDF [$fileIndex]: $uri")
-                // PdfRenderer takes ownership of the pfd and closes it when closed —
-                // do NOT also wrap pfd in .use to avoid double-close
+            // Group consecutive pages from the same URI to minimise open/close cycles.
+            val groups = config.pages.groupByUri()
+
+            for ((uri, pagesInFile) in groups) {
+                Log.d(TAG, "Opening $uri (${pagesInFile.size} pages to copy)")
                 val pfd = context.contentResolver.openFileDescriptor(uri, "r")
-                    ?: error("Cannot open file descriptor for PDF [$fileIndex]")
+                    ?: error("Cannot open file descriptor for $uri")
 
                 PdfRenderer(pfd).use { renderer ->
-                    val count = renderer.pageCount
-                    Log.d(TAG, "  Renderer opened. Pages: $count")
-                    for (i in 0 until count) {
-                        val page = renderer.openPage(i)
-                        val w = page.width
-                        val h = page.height
-                        Log.d(TAG, "  Copying page $i ($w×$h) → output page $pageNumber")
+                    for (pageItem in pagesInFile) {
+                        val srcIdx = pageItem.sourcePageIndex
+                        check(srcIdx in 0 until renderer.pageCount) {
+                            "Page index $srcIdx out of range in $uri"
+                        }
 
-                        check(w > 0 && h > 0) { "Page $i of PDF [$fileIndex] has invalid dimensions ${w}×${h}" }
+                        renderer.openPage(srcIdx).use { page ->
+                            val srcW = page.width
+                            val srcH = page.height
+                            check(srcW > 0 && srcH > 0) {
+                                "Page $srcIdx in $uri has invalid dimensions ${srcW}×${srcH}"
+                            }
 
-                        val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
-                        bitmap.eraseColor(Color.WHITE)
-                        page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_PRINT)
-                        page.close()
+                            val baseRotation = pageItem.rotation.normalizeRotation()
+                            val fineRotation = pageItem.fineRotation
+                            val totalRotation = baseRotation.toFloat() + fineRotation
+                            val swapDims = baseRotation == 90 || baseRotation == 270
+                            val outW = if (swapDims) srcH else srcW
+                            val outH = if (swapDims) srcW else srcH
 
-                        val pageInfo = PdfDocument.PageInfo.Builder(w, h, pageNumber++).create()
-                        val pdfPage = document.startPage(pageInfo)
-                        pdfPage.canvas.drawBitmap(bitmap, 0f, 0f, null)
-                        document.finishPage(pdfPage)
-                        bitmap.recycle()
+                            val bitmap = Bitmap.createBitmap(srcW, srcH, Bitmap.Config.ARGB_8888)
+                            bitmap.eraseColor(Color.WHITE)
+                            page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_PRINT)
+
+                            val pageInfo = PdfDocument.PageInfo.Builder(outW, outH, outputPageNumber++).create()
+                            val pdfPage = document.startPage(pageInfo)
+                            val canvas = pdfPage.canvas
+
+                            if (totalRotation != 0f) {
+                                val matrix = Matrix()
+                                matrix.postRotate(totalRotation, srcW / 2f, srcH / 2f)
+                                if (swapDims) {
+                                    matrix.postTranslate(
+                                        (outW - srcW) / 2f,
+                                        (outH - srcH) / 2f
+                                    )
+                                }
+                                canvas.drawBitmap(bitmap, matrix, null)
+                            } else {
+                                canvas.drawBitmap(bitmap, 0f, 0f, null)
+                            }
+
+                            document.finishPage(pdfPage)
+                            bitmap.recycle()
+                        }
 
                         processed++
-                        emit(MergeEvent.Progress(current = processed, total = totalPages))
+                        Log.d(TAG, "  Wrote page $processed/$total (src=$srcIdx, rot=${pageItem.rotation}°, fine=${pageItem.fineRotation}°)")
+                        emit(MergeEvent.Progress(current = processed, total = total))
                     }
                 }
-                Log.d(TAG, "PDF [$fileIndex] fully copied")
+                Log.d(TAG, "Closed $uri")
             }
 
-            Log.d(TAG, "All pages copied. Saving to MediaStore...")
+            Log.d(TAG, "All pages written. Saving to MediaStore…")
             val savedUri = saveMergedPdf(document, config.outputFileName)
-            Log.d(TAG, "=== Saved merged PDF: $savedUri ===")
-
+            Log.d(TAG, "=== Saved: $savedUri ===")
             emit(MergeEvent.Completed(fileName = config.outputFileName))
         } finally {
             document.close()
@@ -105,7 +117,6 @@ class MergeRepositoryImpl(private val context: Context) : MergeRepository {
 
     private fun saveMergedPdf(document: PdfDocument, fileName: String): Uri {
         val resolver = context.contentResolver
-
         val values = ContentValues().apply {
             put(MediaStore.Files.FileColumns.DISPLAY_NAME, fileName)
             put(MediaStore.Files.FileColumns.MIME_TYPE, "application/pdf")
@@ -114,35 +125,40 @@ class MergeRepositoryImpl(private val context: Context) : MergeRepository {
                 put(MediaStore.Files.FileColumns.IS_PENDING, 1)
             }
         }
-        Log.d(TAG, "Inserting into MediaStore. RELATIVE_PATH=$OUTPUT_RELATIVE_PATH, API=${Build.VERSION.SDK_INT}")
 
-        val collectionUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        val collectionUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
             MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL)
-        } else {
+        else
             MediaStore.Files.getContentUri("external")
-        }
-        Log.d(TAG, "Collection URI: $collectionUri")
 
         val uri = requireNotNull(resolver.insert(collectionUri, values)) {
             "MediaStore insert returned null for $fileName"
         }
-        Log.d(TAG, "MediaStore row created: $uri")
-
-        resolver.openOutputStream(uri)?.use { stream ->
-            Log.d(TAG, "Writing document to stream...")
-            document.writeTo(stream)
-            Log.d(TAG, "writeTo() complete")
-        } ?: error("openOutputStream returned null for $uri")
+        resolver.openOutputStream(uri)?.use { document.writeTo(it) }
+            ?: error("openOutputStream returned null for $uri")
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val pending = ContentValues().apply {
+            resolver.update(uri, ContentValues().apply {
                 put(MediaStore.Files.FileColumns.IS_PENDING, 0)
-            }
-            val rows = resolver.update(uri, pending, null, null)
-            Log.d(TAG, "IS_PENDING cleared. Updated rows: $rows")
+            }, null, null)
         }
-
-        Log.d(TAG, "=== Final output URI: $uri ===")
         return uri
     }
+
+    // Preserve the original order of pages while grouping consecutive pages by URI,
+    // so we open each PdfRenderer file once per contiguous run rather than once per page.
+    private fun List<PageItem>.groupByUri(): List<Pair<android.net.Uri, List<PageItem>>> {
+        if (isEmpty()) return emptyList()
+        val result = mutableListOf<Pair<android.net.Uri, MutableList<PageItem>>>()
+        for (page in this) {
+            if (result.isEmpty() || result.last().first != page.sourceUri) {
+                result.add(Pair(page.sourceUri, mutableListOf(page)))
+            } else {
+                result.last().second.add(page)
+            }
+        }
+        return result
+    }
+
+    private fun Int.normalizeRotation(): Int = ((this % 360) + 360) % 360
 }

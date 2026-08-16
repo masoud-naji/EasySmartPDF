@@ -89,3 +89,109 @@ Use a vertical "circuit-like" honeycomb network with vertex nodes (dots).
 Matches the specific professional, engineered look requested for the Poonel brand.
 ### Status
 Accepted
+
+---
+
+## 2026-07-11 (Page Editor Architecture)
+### Decision
+Introduce a reusable Page Editor as a middle step inside the Merge PDF flow, operating at the page level rather than the file level.
+### Reason
+Users need to reorder, rotate, and delete individual pages before merging. The same editor will be reused by Split PDF, Images to PDF, and future editing features. Putting it inside Merge first allows the design to be validated before broader reuse.
+### Status
+Accepted
+
+---
+
+## 2026-07-11 (MergeConfig Breaking Change)
+### Decision
+Replace `MergeConfig.pdfUris: List<Uri>` with `MergeConfig.pages: List<PageItem>`.
+### Reason
+The merge pipeline now needs per-page instructions (source file, page index, rotation). File-level URIs cannot carry this information.
+### Status
+Accepted
+
+---
+
+## 2026-07-11 (Rotate is Not a Standalone Tool)
+### Decision
+Rotate is NOT a home screen feature. It is only available inside the Page Editor.
+### Reason
+Prevents feature creep. Rotate without context (which pages? in what order?) is rarely useful alone. The Page Editor provides the correct context.
+### Status
+Accepted
+
+---
+
+## 2026-07-11 (Shared ViewModel via Back Stack Entry)
+### Decision
+MergePdfViewModel is shared between MergePdfScreen and MergePageEditorScreen by resolving it from the MergePdf back stack entry.
+### Reason
+The file-selection state and page-editor state belong to the same user session. Sharing one ViewModel avoids inter-ViewModel communication complexity. Standard Compose Navigation pattern — no new infrastructure needed.
+### Status
+Accepted
+
+---
+
+## 2026-07-12 (Phase 0: PageOperationsDelegate)
+### Decision
+Extract all page operation logic (thumbnail loading, rotate, delete, reorder, zoom, bitmap lifecycle) from MergePdfViewModel into a standalone `PageOperationsDelegate` class.
+### Reason
+MergePdfViewModel mixed three unrelated concerns: file selection, page management, and merge execution. The delegate isolates the page management concern so future ViewModels (PdfEditViewModel, ScannerViewModel) can compose it without duplicating code. MergePdfViewModel now owns only file selection and merge execution; it delegates all page ops to the composed delegate.
+### Implementation
+- `PageOperationsDelegate` holds `StateFlow<PageOrganizerState>` internally.
+- `MergePdfViewModel` combines `_fileState` + `delegate.state` via `combine().stateIn()` to produce the same `MergePdfUiState` shape — zero changes to any screen or navigation.
+- `PageOrganizerState` is a new domain model: pages, thumbnailsLoaded, thumbnailsTotal, zoomedPageId.
+### Status
+Accepted
+
+---
+
+## 2026-07-12 (Phase 1: PageOrganizerScreen)
+### Decision
+Generalize `MergePageEditorScreen` into a reusable `PageOrganizerScreen` (pure composable) in a new `ui/screens/pageorganizer/` package. Delete `MergePageEditorScreen`. Rename nav route `merge_page_editor` → `page_organizer`.
+### Reason
+The screen has no feature-specific code — all wiring (ViewModel, callbacks, CTA text) is done in the NavGraph entry. Any future caller (PdfEdit, Scanner) adds one composable block in NavGraph with no changes to the screen itself.
+### Implementation
+- `PageOrganizerScreen` takes all state and callbacks as parameters; no ViewModel or navigation imports.
+- NavGraph entry for `page_organizer` resolves `MergePdfViewModel` from the `merge_pdf` back stack entry and passes all state + lambdas down.
+- Merge PDF behavior is 100% unchanged.
+### Status
+Accepted
+
+---
+
+## 2026-07-12 (Phase 2: PageEditorScreen + fine rotation)
+### Decision
+Create `PageEditorScreen` + `PageEditorViewModel` for per-page fine editing. Single tap on a thumbnail opens the page editor; long press opens zoom preview.
+### Reason
+Users need to fine-tune individual page rotation (±45°) in addition to 90° snapping. Separating single-page editing from page organization keeps concerns clean: `PageOrganizerScreen` handles ordering/bulk ops, `PageEditorScreen` handles per-page detail edits.
+### Implementation
+- `PageItem` gains `fineRotation: Float = 0f` — the ±45° fine-rotation offset on top of the integer 90° snap.
+- `PageOperationsDelegate` gains `updatePage(PageItem)` — replaces a page in the list by ID, preserving order.
+- `MergePdfViewModel` exposes `updatePage()` as a pass-through to the delegate.
+- `PageEditorViewModel` is a plain `ViewModel` (no `Application` dependency). Holds a copy of the page being edited. `loadPage()` is idempotent (only sets if page is null) to prevent overwriting edits on recomposition.
+- `PageEditorScreen` is a pure composable: page preview with combined rotation, 90° rotate buttons, fine-rotation slider (–45 to +45°). No ViewModel or navigation imports.
+- NavGraph wiring: `page_organizer` `onPageClick` now navigates to `page_editor/{pageIndex}`; `onLongPressPage` triggers zoom preview. `page_editor` entry resolves `MergePdfViewModel` from the `merge_pdf` back stack, creates its own `PageEditorViewModel`, and calls `mergeVM.updatePage()` on Apply before popping.
+- `MergeRepositoryImpl` applies `totalRotation = baseRotation + fineRotation` in the matrix; `swapDims` is still determined by the 90° base only.
+- `PageThumbnailCard` updated: `combinedClickable` (tap = open editor, long press = zoom); rotation preview shows `rotation + fineRotation`.
+### Status
+Accepted
+
+---
+
+## 2026-07-12 (Phase 3: Standalone PDF Editor)
+### Decision
+Add a standalone PDF Editor feature accessible from the home screen. Reuses `PageOrganizerScreen`, `PageEditorScreen`, and `PageOperationsDelegate` without duplicating any logic.
+### Reason
+Phase 3 validates that the reusable architecture from Phases 0–2 can be wired to an entirely different feature entry point. The user gets a dedicated tool for editing a single PDF (reorder/rotate/delete/fine-rotate pages, then save).
+### Implementation
+- `PdfEditViewModel`: composes `PageOperationsDelegate` + `MergePdfUseCase` (reused) for page management and the save pipeline. Pattern mirrors `MergePdfViewModel` but scoped to a single-file flow. `buildOutputFileName()` prefixes output with "Edited_".
+- `PdfEditUiState` + `PdfEditSaveState` defined locally in the `pdfedit` package; no cross-feature state dependencies.
+- `PdfEditScreen`: single-file selector with "Edit Pages" CTA; enabled only when metadata has loaded.
+- `PdfEditProgressScreen` + `PdfEditSuccessScreen`: identical pattern to Merge counterparts, wired to `PdfEditViewModel`.
+- NavGraph: adds five new routes (`pdf_edit`, `pdf_edit_page_organizer`, `pdf_edit_page_editor/{pageIndex}`, `pdf_edit_progress`, `pdf_edit_success/{fileName}`). `pdf_edit_page_organizer` and `pdf_edit_page_editor` resolve `PdfEditViewModel` from `pdf_edit` back stack entry — same scoping pattern as Merge.
+- `PageOrganizerScreen` reused with `ctaText = "Save PDF"`. `PageEditorScreen` reused with `PdfEditViewModel.updatePage()` as the apply callback.
+- `PdfOperation.PDF_EDIT` added to `FeatureIllustration`. Home screen gains `onPdfEditClick` callback.
+- Zero changes to any existing Merge, Split, or Image-to-PDF code.
+### Status
+Accepted

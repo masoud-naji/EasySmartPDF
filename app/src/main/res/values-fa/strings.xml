@@ -4,7 +4,7 @@
 
     <!-- Home Screen -->
     <string name="home_title">پونل</string>
-    <string name="feature_pdf_to_images_title">PDF → تصویر</string>
+    <string name="feature_pdf_to_images_title">PDF ← تصویر</string>
     <string name="feature_pdf_to_images_desc">هر صفحه PDF را به تصویر تبدیل کنید.</string>
     <string name="feature_pdf_to_images_action">تبدیل</string>
 
@@ -16,7 +16,7 @@
     <string name="feature_split_pdf_desc">صفحات را استخراج یا PDF را تقسیم کنید.</string>
     <string name="feature_split_pdf_action">تقسیم</string>
 
-    <string name="feature_images_to_pdf_title">تصویر → PDF</string>
+    <string name="feature_images_to_pdf_title">تصویر ← PDF</string>
     <string name="feature_images_to_pdf_desc">تصاویر را به یک PDF تبدیل کنید.</string>
     <string name="feature_images_to_pdf_action">ساخت</string>
 
@@ -70,6 +70,7 @@
     <string name="merge_add_pdf">افزودن PDF</string>
     <string name="merge_add_more_pdf">افزودن PDF بیشتر</string>
     <string name="merge_action">ادغام</string>
+    <string name="merge_arrange_pages">مرتب‌سازی صفحات</string>
     <string name="merge_loading_details">در حال بارگذاری…</string>
     <string name="merge_need_two_files">حداقل ۲ PDF برای ادغام اضافه کنید.</string>
     <string name="merge_remove_file">حذف</string>
@@ -165,4 +166,34 @@
     <string name="settings_about_support">پشتیبانی</string>
     <string name="settings_about_support_email">support@poonel.app</string>
     <string name="logo_content_description">لوگوی پونل</string>
+
+    <!-- Page Editor -->
+    <string name="page_editor_title">مرتب‌سازی صفحات</string>
+    <string name="page_editor_loading_progress">بارگذاری %1$d از %2$d…</string>
+    <string name="page_editor_rotate_left">چرخش به چپ</string>
+    <string name="page_editor_rotate_right">چرخش به راست</string>
+    <string name="page_editor_delete_page">حذف صفحه</string>
+    <string name="page_editor_close_preview">بستن پیش‌نمایش</string>
+    <string name="page_editor_page_of">صفحه %1$d از %2$d</string>
+    <string name="page_editor_thumbnail_error">بارگذاری ناموفق</string>
+
+    <plurals name="page_editor_merge_action">
+        <item quantity="one">ادغام %d صفحه</item>
+        <item quantity="other">ادغام %d صفحه</item>
+    </plurals>
+
+    <!-- Single Page Editor -->
+    <string name="single_page_editor_title">ویرایش صفحه</string>
+    <string name="single_page_editor_apply">اعمال</string>
+    <string name="single_page_editor_fine_rotation">چرخش دقیق: %1$.1f°</string>
+
+    <!-- PDF Edit Feature -->
+    <string name="pdf_edit_title">ویرایش PDF</string>
+    <string name="feature_pdf_edit_desc">صفحات را مرتب‌سازی، چرخش یا حذف کنید.</string>
+    <string name="feature_pdf_edit_action">ویرایش</string>
+    <string name="pdf_edit_edit_pages">ویرایش صفحات</string>
+    <string name="pdf_edit_save_action">ذخیره PDF</string>
+    <string name="pdf_edit_cancel_dialog_title">ذخیره‌سازی متوقف شود؟</string>
+    <string name="pdf_edit_success_message">PDF ویرایش‌شده ذخیره شد.</string>
+    <string name="pdf_edit_progress_saving">ذخیره صفحه %1$d…</string>
 </resources>

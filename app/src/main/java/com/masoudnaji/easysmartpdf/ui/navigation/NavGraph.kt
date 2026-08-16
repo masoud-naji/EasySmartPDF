@@ -19,14 +19,28 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.masoudnaji.easysmartpdf.R
 import com.masoudnaji.easysmartpdf.ui.components.PoonelBackground
 import com.masoudnaji.easysmartpdf.ui.screens.home.HomeScreen
 import com.masoudnaji.easysmartpdf.ui.screens.imagetopdf.ImageToPdfProgressScreen
 import com.masoudnaji.easysmartpdf.ui.screens.imagetopdf.ImageToPdfScreen
 import com.masoudnaji.easysmartpdf.ui.screens.imagetopdf.ImageToPdfSuccessScreen
 import com.masoudnaji.easysmartpdf.ui.screens.merge.MergePdfScreen
+import com.masoudnaji.easysmartpdf.ui.screens.merge.MergePdfViewModel
 import com.masoudnaji.easysmartpdf.ui.screens.merge.MergeProgressScreen
 import com.masoudnaji.easysmartpdf.ui.screens.merge.MergeSuccessScreen
+import com.masoudnaji.easysmartpdf.ui.screens.pageeditor.PageEditorScreen
+import com.masoudnaji.easysmartpdf.ui.screens.pageeditor.PageEditorViewModel
+import com.masoudnaji.easysmartpdf.ui.screens.pageorganizer.PageOrganizerScreen
+import com.masoudnaji.easysmartpdf.ui.screens.pdfedit.PdfEditProgressScreen
+import com.masoudnaji.easysmartpdf.ui.screens.pdfedit.PdfEditScreen
+import com.masoudnaji.easysmartpdf.ui.screens.pdfedit.PdfEditSuccessScreen
+import com.masoudnaji.easysmartpdf.ui.screens.pdfedit.PdfEditViewModel
 import com.masoudnaji.easysmartpdf.ui.screens.pdftoimage.CreatePicturesScreen
 import com.masoudnaji.easysmartpdf.ui.screens.progress.ProgressScreen
 import com.masoudnaji.easysmartpdf.ui.screens.settings.SettingsScreen
@@ -43,6 +57,8 @@ object Screen {
     const val Progress = "progress"
     const val SuccessRoute = "success/{savedCount}/{folderName}"
     const val MergePdf = "merge_pdf"
+    const val PageOrganizer = "page_organizer"
+    const val PageEditorRoute = "page_editor/{pageIndex}"
     const val MergeProgress = "merge_progress"
     const val MergeSuccessRoute = "merge_success/{fileName}"
     const val SplitPdf = "split_pdf"
@@ -51,6 +67,11 @@ object Screen {
     const val ImageToPdf = "image_to_pdf"
     const val ImageToPdfProgress = "image_to_pdf_progress"
     const val ImageToPdfSuccessRoute = "image_to_pdf_success/{fileName}"
+    const val PdfEdit = "pdf_edit"
+    const val PdfEditPageOrganizer = "pdf_edit_page_organizer"
+    const val PdfEditPageEditorRoute = "pdf_edit_page_editor/{pageIndex}"
+    const val PdfEditProgress = "pdf_edit_progress"
+    const val PdfEditSuccessRoute = "pdf_edit_success/{fileName}"
 
     fun successDestination(savedCount: Int, folderName: String) =
         "success/$savedCount/${Uri.encode(folderName)}"
@@ -63,6 +84,10 @@ object Screen {
 
     fun imageToPdfSuccessDestination(fileName: String) =
         "image_to_pdf_success/${Uri.encode(fileName)}"
+
+    fun pageEditorDestination(pageIndex: Int) = "page_editor/$pageIndex"
+    fun pdfEditPageEditorDestination(pageIndex: Int) = "pdf_edit_page_editor/$pageIndex"
+    fun pdfEditSuccessDestination(fileName: String) = "pdf_edit_success/${Uri.encode(fileName)}"
 }
 
 @Composable
@@ -83,6 +108,7 @@ fun PoonelNavHost(
                     onMergePdfClick = { navController.navigate(Screen.MergePdf) },
                     onSplitPdfClick = { navController.navigate(Screen.SplitPdf) },
                     onImageToPdfClick = { navController.navigate(Screen.ImageToPdf) },
+                    onPdfEditClick = { navController.navigate(Screen.PdfEdit) },
                     onSettingsClick = { navController.navigate(Screen.Settings) }
                 )
             }
@@ -143,7 +169,74 @@ fun PoonelNavHost(
             composable(Screen.MergePdf) {
                 MergePdfScreen(
                     onBackClick = { navController.popBackStack() },
-                    onNavigateToProgress = { navController.navigate(Screen.MergeProgress) }
+                    onNavigateToPageEditor = { navController.navigate(Screen.PageOrganizer) }
+                )
+            }
+
+            composable(Screen.PageOrganizer) { backStackEntry ->
+                val mergePdfEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(Screen.MergePdf)
+                }
+                val vm: MergePdfViewModel = viewModel(mergePdfEntry)
+                val state by vm.uiState.collectAsState()
+                val pageCount = state.pages.size
+                PageOrganizerScreen(
+                    pages = state.pages,
+                    thumbnailsLoaded = state.thumbnailsLoaded,
+                    thumbnailsTotal = state.thumbnailsTotal,
+                    zoomedPageId = state.zoomedPageId,
+                    errorMessage = state.errorMessage,
+                    ctaText = if (pageCount > 0)
+                        pluralStringResource(R.plurals.page_editor_merge_action, pageCount, pageCount)
+                    else
+                        stringResource(R.string.merge_action),
+                    onLoad = vm::loadPageThumbnails,
+                    onBackClick = { navController.popBackStack() },
+                    onRotateLeft = { pageId -> vm.rotatePage(pageId, clockwise = false) },
+                    onRotateRight = { pageId -> vm.rotatePage(pageId, clockwise = true) },
+                    onDelete = vm::deletePage,
+                    onMove = vm::movePage,
+                    onPageClick = { pageId ->
+                        val idx = state.pages.indexOfFirst { it.id == pageId }
+                        if (idx >= 0) navController.navigate(Screen.pageEditorDestination(idx))
+                    },
+                    onLongPressPage = vm::setZoomedPage,
+                    onZoomDismiss = { vm.setZoomedPage(null) },
+                    onErrorShown = vm::onErrorDismissed,
+                    onConfirm = {
+                        vm.startMerge()
+                        navController.navigate(Screen.MergeProgress)
+                    }
+                )
+            }
+
+            composable(
+                route = Screen.PageEditorRoute,
+                arguments = listOf(navArgument("pageIndex") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val pageIndex = backStackEntry.arguments?.getInt("pageIndex") ?: -1
+                val mergeEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(Screen.MergePdf)
+                }
+                val mergeVM: MergePdfViewModel = viewModel(mergeEntry)
+                val editorVM: PageEditorViewModel = viewModel()
+                val editorState by editorVM.uiState.collectAsState()
+
+                androidx.compose.runtime.LaunchedEffect(pageIndex) {
+                    val page = mergeVM.uiState.value.pages.getOrNull(pageIndex)
+                    if (page != null) editorVM.loadPage(page)
+                }
+
+                PageEditorScreen(
+                    page = editorState.page,
+                    onRotateLeft = editorVM::rotateLeft,
+                    onRotateRight = editorVM::rotateRight,
+                    onFineRotate = editorVM::setFineRotation,
+                    onBackClick = { navController.popBackStack() },
+                    onApply = {
+                        editorVM.getUpdatedPage()?.let { mergeVM.updatePage(it) }
+                        navController.popBackStack()
+                    }
                 )
             }
 
@@ -220,6 +313,110 @@ fun PoonelNavHost(
                     fileCount = fileCount,
                     folderName = folderName,
                     onOpenFolder = { openSplitFolder(context, folderName) },
+                    onBackToHome = {
+                        navController.navigate(Screen.Home) {
+                            popUpTo(Screen.Home) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
+            // PDF Edit flow
+            composable(Screen.PdfEdit) {
+                PdfEditScreen(
+                    onBackClick = { navController.popBackStack() },
+                    onNavigateToPageOrganizer = { navController.navigate(Screen.PdfEditPageOrganizer) }
+                )
+            }
+
+            composable(Screen.PdfEditPageOrganizer) { backStackEntry ->
+                val pdfEditEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(Screen.PdfEdit)
+                }
+                val vm: PdfEditViewModel = viewModel(pdfEditEntry)
+                val state by vm.uiState.collectAsState()
+                PageOrganizerScreen(
+                    pages = state.pages,
+                    thumbnailsLoaded = state.thumbnailsLoaded,
+                    thumbnailsTotal = state.thumbnailsTotal,
+                    zoomedPageId = state.zoomedPageId,
+                    errorMessage = state.errorMessage,
+                    ctaText = stringResource(R.string.pdf_edit_save_action),
+                    onLoad = vm::loadPageThumbnails,
+                    onBackClick = { navController.popBackStack() },
+                    onRotateLeft = { pageId -> vm.rotatePage(pageId, clockwise = false) },
+                    onRotateRight = { pageId -> vm.rotatePage(pageId, clockwise = true) },
+                    onDelete = vm::deletePage,
+                    onMove = vm::movePage,
+                    onPageClick = { pageId ->
+                        val idx = state.pages.indexOfFirst { it.id == pageId }
+                        if (idx >= 0) navController.navigate(Screen.pdfEditPageEditorDestination(idx))
+                    },
+                    onLongPressPage = vm::setZoomedPage,
+                    onZoomDismiss = { vm.setZoomedPage(null) },
+                    onErrorShown = vm::onErrorDismissed,
+                    onConfirm = {
+                        vm.startSave()
+                        navController.navigate(Screen.PdfEditProgress)
+                    }
+                )
+            }
+
+            composable(
+                route = Screen.PdfEditPageEditorRoute,
+                arguments = listOf(navArgument("pageIndex") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val pageIndex = backStackEntry.arguments?.getInt("pageIndex") ?: -1
+                val pdfEditEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(Screen.PdfEdit)
+                }
+                val pdfEditVM: PdfEditViewModel = viewModel(pdfEditEntry)
+                val editorVM: PageEditorViewModel = viewModel()
+                val editorState by editorVM.uiState.collectAsState()
+
+                androidx.compose.runtime.LaunchedEffect(pageIndex) {
+                    val page = pdfEditVM.uiState.value.pages.getOrNull(pageIndex)
+                    if (page != null) editorVM.loadPage(page)
+                }
+
+                PageEditorScreen(
+                    page = editorState.page,
+                    onRotateLeft = editorVM::rotateLeft,
+                    onRotateRight = editorVM::rotateRight,
+                    onFineRotate = editorVM::setFineRotation,
+                    onBackClick = { navController.popBackStack() },
+                    onApply = {
+                        editorVM.getUpdatedPage()?.let { pdfEditVM.updatePage(it) }
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            composable(Screen.PdfEditProgress) { backStackEntry ->
+                val pdfEditEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(Screen.PdfEdit)
+                }
+                PdfEditProgressScreen(
+                    pdfEditEntry = pdfEditEntry,
+                    onSaveComplete = { fileName ->
+                        navController.navigate(Screen.pdfEditSuccessDestination(fileName)) {
+                            popUpTo(Screen.PdfEdit) { inclusive = true }
+                        }
+                    },
+                    onSaveFailed = { navController.popBackStack() },
+                    onSaveCancelled = { navController.popBackStack() }
+                )
+            }
+
+            composable(
+                route = Screen.PdfEditSuccessRoute,
+                arguments = listOf(navArgument("fileName") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val fileName = backStackEntry.arguments?.getString("fileName") ?: ""
+                val context = LocalContext.current
+                PdfEditSuccessScreen(
+                    fileName = fileName,
+                    onOpenFile = { openMergedFile(context, fileName) },
                     onBackToHome = {
                         navController.navigate(Screen.Home) {
                             popUpTo(Screen.Home) { inclusive = true }

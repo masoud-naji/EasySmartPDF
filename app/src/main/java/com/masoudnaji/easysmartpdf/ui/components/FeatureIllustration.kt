@@ -57,7 +57,8 @@ enum class PdfOperation {
     PDF_TO_IMAGES,
     MERGE_PDFS,
     SPLIT_PDF,
-    IMAGES_TO_PDF
+    IMAGES_TO_PDF,
+    PDF_EDIT
 }
 
 @Composable
@@ -85,6 +86,10 @@ fun FeatureIllustration(
             PdfOperation.IMAGES_TO_PDF -> IllustrationLayout(
                 source = { ImagesIcon(size = IllustrationDefaults.Card4_ImagesSize) },
                 target = { PdfIcon(size = IllustrationDefaults.Card4_PdfSize) }
+            )
+            PdfOperation.PDF_EDIT -> IllustrationLayout(
+                source = { PdfIcon(size = IllustrationDefaults.Card1_PdfSize) },
+                target = { PdfIcon(size = IllustrationDefaults.Card1_PdfSize) }
             )
         }
     }
