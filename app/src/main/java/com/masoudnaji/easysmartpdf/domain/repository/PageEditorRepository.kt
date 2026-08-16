@@ -5,5 +5,6 @@ import android.net.Uri
 
 interface PageEditorRepository {
     suspend fun renderThumbnail(uri: Uri, pageIndex: Int, targetWidthPx: Int): Bitmap
+    suspend fun renderImageThumbnail(uri: Uri, targetWidthPx: Int): Bitmap
     suspend fun getPageCount(uri: Uri): Int
 }

@@ -145,13 +145,31 @@ Changed files:
 - `ui/navigation/NavGraph.kt` — five new routes; all screens reused via NavGraph wiring
 - `res/values/strings.xml` + `values-fa/strings.xml` — `pdf_edit_*` strings
 
+## Scanner Feature — ML Kit Document Scanner COMPLETE (2026-08-16)
+
+### Infrastructure
+Integrated Google ML Kit Document Scanner for high-quality document acquisition from both Camera and Gallery.
+
+New dependencies:
+- `com.google.android.gms:play-services-mlkit-document-scanner:16.0.0`
+
+Changed files:
+- `ScannerEntryScreen.kt` — replaced raw gallery picker with ML Kit Scanner; `setGalleryImportAllowed(true)` enables unified camera/gallery flow with document correction
+- `ScannerViewModel.kt` — added `copyUriToSession` logic to persist corrected ML Kit results into `filesDir/scanner_session/`; implemented `clearSession()` in `onCleared`
+- `NavGraph.kt` — updated `ScannerPageOrganizer` to use ML Kit for "Import More", allowing users to add additional corrected pages during a session
+- `strings.xml` + `values-fa/strings.xml` — added `scanner_start_action`, `scanner_not_available`, and refined empty state descriptions
+
+### Technical Implementation Details
+- **ML Kit Configuration**: `SCANNER_MODE_FULL` (enables filters/enhancement), `RESULT_FORMAT_JPEG`, `pageLimit=50`.
+- **Session Persistence**: ML Kit returns temporary/cached URIs. The ViewModel now copies these into app-private storage to ensure they survive until PDF generation is complete.
+- **Cleanup Strategy**: The `scanner_session` directory is recursively deleted in `ScannerViewModel.onCleared()`. Since the VM is scoped to the scanner navigation entry, this ensures cleanup happens when the user leaves the feature.
+
 ---
 
 ## Known TODOs / Next Steps
 1. **Language Switching**: Finalize the runtime locale override for Persian/English.
 2. **Permissions**: Request `WRITE_EXTERNAL_STORAGE` on API 26-28.
-3. **Scanner (Phase 2)**: Implementation of document scanning.
-4. **OCR (Phase 2)**: Text extraction from PDF/Images.
+3. **OCR**: Text extraction from PDF/Images — not yet planned.
 
 ---
 

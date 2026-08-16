@@ -196,4 +196,18 @@
     <string name="pdf_edit_cancel_dialog_title">Stop saving?</string>
     <string name="pdf_edit_success_message">Your edited PDF has been saved.</string>
     <string name="pdf_edit_progress_saving">Saving page %1$d…</string>
+
+    <!-- Scanner Feature -->
+    <string name="scanner_title">Scan → PDF</string>
+    <string name="scanner_empty_title">Capture Documents</string>
+    <string name="scanner_empty_desc">Scan documents with your camera or import existing photos.</string>
+    <string name="scanner_start_action">Start Scanning</string>
+    <string name="scanner_not_available">Document scanner is not available on this device.</string>
+    <string name="scanner_import_gallery">Import from Gallery</string>
+    <string name="scanner_import_more">Add More Pages</string>
+    <string name="scanner_use_camera">Use Camera</string>
+    <string name="scanner_create_pdf_action">Create PDF</string>
+    <string name="scanner_cancel_dialog_title">Stop creating PDF?</string>
+    <string name="scanner_progress_processing">Processing page %1$d…</string>
+    <string name="scanner_success_message">Your scanned PDF has been created.</string>
 </resources>

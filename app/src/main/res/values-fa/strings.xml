@@ -196,4 +196,18 @@
     <string name="pdf_edit_cancel_dialog_title">ذخیره‌سازی متوقف شود؟</string>
     <string name="pdf_edit_success_message">PDF ویرایش‌شده ذخیره شد.</string>
     <string name="pdf_edit_progress_saving">ذخیره صفحه %1$d…</string>
+
+    <!-- Scanner Feature -->
+    <string name="scanner_title">اسکن ← PDF</string>
+    <string name="scanner_empty_title">ثبت اسناد</string>
+    <string name="scanner_empty_desc">اسناد را با دوربین خود اسکن کنید یا عکس‌های موجود را وارد کنید.</string>
+    <string name="scanner_start_action">شروع اسکن</string>
+    <string name="scanner_not_available">اسکنر اسناد در این دستگاه در دسترس نیست.</string>
+    <string name="scanner_import_gallery">وارد کردن از گالری</string>
+    <string name="scanner_import_more">افزودن صفحات بیشتر</string>
+    <string name="scanner_use_camera">استفاده از دوربین</string>
+    <string name="scanner_create_pdf_action">ساخت PDF</string>
+    <string name="scanner_cancel_dialog_title">ساخت PDF متوقف شود؟</string>
+    <string name="scanner_progress_processing">در حال پردازش صفحه %1$d…</string>
+    <string name="scanner_success_message">PDF اسکن شده شما ایجاد شد.</string>
 </resources>

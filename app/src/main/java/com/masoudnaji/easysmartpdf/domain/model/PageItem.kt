@@ -11,5 +11,6 @@ data class PageItem(
     val rotation: Int = 0,
     val fineRotation: Float = 0f,
     val thumbnail: Bitmap? = null,
-    val thumbnailState: ThumbnailState = ThumbnailState.Pending
+    val thumbnailState: ThumbnailState = ThumbnailState.Pending,
+    val sourceType: PageSourceType = PageSourceType.PDF
 )

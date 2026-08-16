@@ -8,6 +8,9 @@ import android.net.Uri
 import android.os.Build
 import android.provider.DocumentsContract
 import android.provider.MediaStore
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -26,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.masoudnaji.easysmartpdf.R
 import com.masoudnaji.easysmartpdf.ui.components.PoonelBackground
+import com.masoudnaji.easysmartpdf.ui.components.SecondaryButton
 import com.masoudnaji.easysmartpdf.ui.screens.home.HomeScreen
 import com.masoudnaji.easysmartpdf.ui.screens.imagetopdf.ImageToPdfProgressScreen
 import com.masoudnaji.easysmartpdf.ui.screens.imagetopdf.ImageToPdfScreen
@@ -41,6 +45,10 @@ import com.masoudnaji.easysmartpdf.ui.screens.pdfedit.PdfEditProgressScreen
 import com.masoudnaji.easysmartpdf.ui.screens.pdfedit.PdfEditScreen
 import com.masoudnaji.easysmartpdf.ui.screens.pdfedit.PdfEditSuccessScreen
 import com.masoudnaji.easysmartpdf.ui.screens.pdfedit.PdfEditViewModel
+import com.masoudnaji.easysmartpdf.ui.screens.scanner.ScannerEntryScreen
+import com.masoudnaji.easysmartpdf.ui.screens.scanner.ScannerProgressScreen
+import com.masoudnaji.easysmartpdf.ui.screens.scanner.ScannerSuccessScreen
+import com.masoudnaji.easysmartpdf.ui.screens.scanner.ScannerViewModel
 import com.masoudnaji.easysmartpdf.ui.screens.pdftoimage.CreatePicturesScreen
 import com.masoudnaji.easysmartpdf.ui.screens.progress.ProgressScreen
 import com.masoudnaji.easysmartpdf.ui.screens.settings.SettingsScreen
@@ -72,6 +80,11 @@ object Screen {
     const val PdfEditPageEditorRoute = "pdf_edit_page_editor/{pageIndex}"
     const val PdfEditProgress = "pdf_edit_progress"
     const val PdfEditSuccessRoute = "pdf_edit_success/{fileName}"
+    const val Scanner = "scanner"
+    const val ScannerPageOrganizer = "scanner_page_organizer"
+    const val ScannerPageEditorRoute = "scanner_page_editor/{pageIndex}"
+    const val ScannerProgress = "scanner_progress"
+    const val ScannerSuccessRoute = "scanner_success/{fileName}"
 
     fun successDestination(savedCount: Int, folderName: String) =
         "success/$savedCount/${Uri.encode(folderName)}"
@@ -88,6 +101,8 @@ object Screen {
     fun pageEditorDestination(pageIndex: Int) = "page_editor/$pageIndex"
     fun pdfEditPageEditorDestination(pageIndex: Int) = "pdf_edit_page_editor/$pageIndex"
     fun pdfEditSuccessDestination(fileName: String) = "pdf_edit_success/${Uri.encode(fileName)}"
+    fun scannerPageEditorDestination(pageIndex: Int) = "scanner_page_editor/$pageIndex"
+    fun scannerSuccessDestination(fileName: String) = "scanner_success/${Uri.encode(fileName)}"
 }
 
 @Composable
@@ -109,6 +124,7 @@ fun PoonelNavHost(
                     onSplitPdfClick = { navController.navigate(Screen.SplitPdf) },
                     onImageToPdfClick = { navController.navigate(Screen.ImageToPdf) },
                     onPdfEditClick = { navController.navigate(Screen.PdfEdit) },
+                    onScanClick = { navController.navigate(Screen.Scanner) },
                     onSettingsClick = { navController.navigate(Screen.Settings) }
                 )
             }
@@ -460,6 +476,148 @@ fun PoonelNavHost(
                 ImageToPdfSuccessScreen(
                     fileName = fileName,
                     onOpenFile = { openImageToPdfFile(context, fileName) },
+                    onBackToHome = {
+                        navController.navigate(Screen.Home) {
+                            popUpTo(Screen.Home) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
+            // Scanner flow
+            composable(Screen.Scanner) { backStackEntry ->
+                val vm: ScannerViewModel = viewModel(backStackEntry)
+                ScannerEntryScreen(
+                    onPhotosSelected = { uris ->
+                        vm.addPhotos(uris)
+                        navController.navigate(Screen.ScannerPageOrganizer)
+                    },
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
+
+            composable(Screen.ScannerPageOrganizer) { backStackEntry ->
+                val scannerEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(Screen.Scanner)
+                }
+                val vm: ScannerViewModel = viewModel(scannerEntry)
+                val state by vm.uiState.collectAsState()
+                val pageCount = state.pages.size
+                val context = LocalContext.current
+
+                val scannerLauncher = rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.StartIntentSenderForResult()
+                ) { result ->
+                    if (result.resultCode == android.app.Activity.RESULT_OK) {
+                        val scanResult = com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult.fromActivityResultIntent(result.data)
+                        val pages = scanResult?.pages?.mapNotNull { it.imageUri } ?: emptyList()
+                        if (pages.isNotEmpty()) vm.addPhotos(pages)
+                    }
+                }
+
+                val startScanner: () -> Unit = {
+                    val options = com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions.Builder()
+                        .setGalleryImportAllowed(true)
+                        .setPageLimit(50)
+                        .setResultFormats(com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions.RESULT_FORMAT_JPEG)
+                        .setScannerMode(com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions.SCANNER_MODE_FULL)
+                        .build()
+
+                    com.google.mlkit.vision.documentscanner.GmsDocumentScanning.getClient(options)
+                        .getStartScanIntent(context as android.app.Activity)
+                        .addOnSuccessListener { intentSender ->
+                            scannerLauncher.launch(IntentSenderRequest.Builder(intentSender).build())
+                        }
+                }
+
+                PageOrganizerScreen(
+                    pages = state.pages,
+                    thumbnailsLoaded = state.thumbnailsLoaded,
+                    thumbnailsTotal = state.thumbnailsTotal,
+                    zoomedPageId = state.zoomedPageId,
+                    errorMessage = state.errorMessage,
+                    ctaText = stringResource(R.string.scanner_create_pdf_action),
+                    onLoad = {},
+                    onBackClick = { navController.popBackStack() },
+                    onRotateLeft = { pageId -> vm.rotatePage(pageId, clockwise = false) },
+                    onRotateRight = { pageId -> vm.rotatePage(pageId, clockwise = true) },
+                    onDelete = vm::deletePage,
+                    onMove = vm::movePage,
+                    onPageClick = { pageId ->
+                        val idx = state.pages.indexOfFirst { it.id == pageId }
+                        if (idx >= 0) navController.navigate(Screen.scannerPageEditorDestination(idx))
+                    },
+                    onLongPressPage = vm::setZoomedPage,
+                    onZoomDismiss = { vm.setZoomedPage(null) },
+                    onErrorShown = vm::onErrorDismissed,
+                    onConfirm = {
+                        vm.startScan()
+                        navController.navigate(Screen.ScannerProgress)
+                    },
+                    bottomActions = {
+                        SecondaryButton(
+                            text = stringResource(R.string.scanner_import_more),
+                            onClick = startScanner
+                        )
+                    }
+                )
+            }
+
+            composable(
+                route = Screen.ScannerPageEditorRoute,
+                arguments = listOf(navArgument("pageIndex") { type = NavType.IntType })
+            ) { backStackEntry ->
+                val pageIndex = backStackEntry.arguments?.getInt("pageIndex") ?: -1
+                val scannerEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(Screen.Scanner)
+                }
+                val scannerVM: ScannerViewModel = viewModel(scannerEntry)
+                val editorVM: PageEditorViewModel = viewModel()
+                val editorState by editorVM.uiState.collectAsState()
+
+                androidx.compose.runtime.LaunchedEffect(pageIndex) {
+                    val page = scannerVM.uiState.value.pages.getOrNull(pageIndex)
+                    if (page != null) editorVM.loadPage(page)
+                }
+
+                PageEditorScreen(
+                    page = editorState.page,
+                    onRotateLeft = editorVM::rotateLeft,
+                    onRotateRight = editorVM::rotateRight,
+                    onFineRotate = editorVM::setFineRotation,
+                    onBackClick = { navController.popBackStack() },
+                    onApply = {
+                        editorVM.getUpdatedPage()?.let { scannerVM.updatePage(it) }
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            composable(Screen.ScannerProgress) { backStackEntry ->
+                val scannerEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry(Screen.Scanner)
+                }
+                ScannerProgressScreen(
+                    scannerEntry = scannerEntry,
+                    onScanComplete = { fileName ->
+                        navController.navigate(Screen.scannerSuccessDestination(fileName)) {
+                            popUpTo(Screen.Scanner) { inclusive = true }
+                        }
+                    },
+                    onScanFailed = { navController.popBackStack() },
+                    onScanCancelled = { navController.popBackStack() }
+                )
+            }
+
+            composable(
+                route = Screen.ScannerSuccessRoute,
+                arguments = listOf(navArgument("fileName") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val fileName = backStackEntry.arguments?.getString("fileName") ?: ""
+                val context = LocalContext.current
+                ScannerSuccessScreen(
+                    fileName = fileName,
+                    onOpenFile = { openMergedFile(context, fileName) },
                     onBackToHome = {
                         navController.navigate(Screen.Home) {
                             popUpTo(Screen.Home) { inclusive = true }

@@ -3,6 +3,7 @@ package com.masoudnaji.easysmartpdf.ui.screens.home
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -29,7 +30,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.CallMerge
 import androidx.compose.material.icons.automirrored.filled.CallSplit
 import androidx.compose.material.icons.filled.AutoFixHigh
-import androidx.compose.material.icons.filled.Compress
+import androidx.compose.material.icons.filled.DocumentScanner
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PictureAsPdf
@@ -76,8 +77,11 @@ import kotlinx.coroutines.launch
 import android.app.Activity
 import kotlin.math.PI
 import kotlin.math.cos
+import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.math.sqrt
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.drawscope.Stroke
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,10 +91,13 @@ fun HomeScreen(
     onSplitPdfClick: () -> Unit,
     onImageToPdfClick: () -> Unit,
     onPdfEditClick: () -> Unit,
+    onScanClick: () -> Unit,
     onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val view = LocalView.current
+    val goldColor = Color(0xFFE9A600)
+
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
@@ -189,8 +196,18 @@ fun HomeScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(vSpacing * 4.5f)
+                        .height(vSpacing * 5f)
                 ) {
+                    // Subtle architectural geometry layer BEHIND the interactive Hive
+                    HiveArchitecturalLayer(
+                        radius = radius,
+                        hSpacing = hSpacing,
+                        vSpacing = vSpacing,
+                        centerX = centerX,
+                        clusterCenterY = clusterCenterY,
+                        color = goldColor
+                    )
+
                     // Row 1 (2 Cells)
                     HiveToolNode(
                         label = "PDF → IMG",
@@ -245,13 +262,12 @@ fun HomeScreen(
                         )
                     )
 
-                    // Row 3 (2 Cells - Placeholders)
+                    // Row 3 (2 Cells)
                     HiveToolNode(
-                        label = "COMPRESS",
-                        icon = Icons.Default.Compress,
+                        label = "SCAN",
+                        icon = Icons.Default.DocumentScanner,
                         radius = radius,
-                        onClick = {}, // Placeholder
-                        enabled = false,
+                        onClick = onScanClick,
                         modifier = Modifier.offset(
                             x = centerX - (hSpacing / 2) - radius,
                             y = clusterCenterY + vSpacing
@@ -347,6 +363,29 @@ fun HiveToolNode(
             ),
         contentAlignment = Alignment.Center
     ) {
+        // Architectural Y-lines drawn AFTER the background but BEFORE icons/text
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val r = size.minDimension / 2f
+            val cx = size.width / 2f
+            val cy = size.height / 2f
+            
+            val lineAlpha = if (enabled) 0.12f else 0.08f
+            
+            // Center to vertices: Bottom (3), Top-Right (1), Top-Left (5)
+            listOf(1, 3, 5).forEach { i ->
+                val angle = (PI / 3) * i - (PI / 2)
+                drawLine(
+                    color = goldColor.copy(alpha = lineAlpha),
+                    start = Offset(cx, cy),
+                    end = Offset(
+                        cx + r * cos(angle).toFloat(),
+                        cy + r * sin(angle).toFloat()
+                    ),
+                    strokeWidth = 1.dp.toPx()
+                )
+            }
+        }
+
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
@@ -399,6 +438,98 @@ class HexagonShape : Shape {
     }
 }
 
+@Composable
+private fun HiveArchitecturalLayer(
+    radius: Dp,
+    hSpacing: Dp,
+    vSpacing: Dp,
+    centerX: Dp,
+    clusterCenterY: Dp,
+    color: Color
+) {
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val r = radius.toPx()
+        val h = hSpacing.toPx()
+        val v = vSpacing.toPx()
+        val cx = centerX.toPx()
+        val cy = clusterCenterY.toPx()
+        
+        // Isometric architectural extension
+        val alpha = 0.12f // Subtle: ~30% of the 0.4 main border alpha
+        
+        fun getVertices(center: Offset): List<Offset> {
+            return (0..5).map { i ->
+                val angle = (PI / 3) * i - (PI / 2)
+                Offset(
+                    center.x + r * cos(angle).toFloat(),
+                    center.y + r * sin(angle).toFloat()
+                )
+            }
+        }
+
+        // Standard 2-3-2 centers derived from the same logic used for node offsets
+        val centers = listOf(
+            Offset(cx - h / 2, cy - v + r),
+            Offset(cx + h / 2, cy - v + r),
+            Offset(cx - h, cy + r),
+            Offset(cx, cy + r),
+            Offset(cx + h, cy + r),
+            Offset(cx - h / 2, cy + v + r),
+            Offset(cx + h / 2, cy + v + r)
+        )
+
+        val uniqueLines = mutableSetOf<LineSegment>()
+
+        centers.forEach { center ->
+            val vts = getVertices(center)
+            
+            // Vertical extension lines (integrating with technical background)
+            // From Top vertex (0) extending UP, from Bottom vertex (3) extending DOWN
+            val ext = r * 0.4f
+            uniqueLines.add(LineSegment(vts[0], vts[0] - Offset(0f, ext)))
+            uniqueLines.add(LineSegment(vts[3], vts[3] + Offset(0f, ext)))
+        }
+
+        uniqueLines.forEach { line ->
+            drawLine(
+                color = color.copy(alpha = alpha),
+                start = line.p1,
+                end = line.p2,
+                strokeWidth = 1.dp.toPx()
+            )
+        }
+    }
+}
+
+private data class LineSegment(val p1: Offset, val p2: Offset) {
+    // Override equals/hashCode to avoid duplicate lines from touching hexagons.
+    // Coordinates are rounded to 1 decimal place to handle float precision issues.
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is LineSegment) return false
+        
+        val thisS = round(p1)
+        val thisE = round(p2)
+        val otherS = round(other.p1)
+        val otherE = round(other.p2)
+        
+        return (thisS == otherS && thisE == otherE) || (thisS == otherE && thisE == otherS)
+    }
+
+    override fun hashCode(): Int {
+        val s = round(p1)
+        val e = round(p2)
+        // Order-independent hash
+        return if (s.x < e.x || (s.x == e.x && s.y < e.y)) {
+            31 * s.hashCode() + e.hashCode()
+        } else {
+            31 * e.hashCode() + s.hashCode()
+        }
+    }
+    
+    private fun round(o: Offset) = Offset((o.x * 10).roundToInt() / 10f, (o.y * 10).roundToInt() / 10f)
+}
+
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
@@ -409,6 +540,7 @@ fun HomeScreenPreview() {
             onSplitPdfClick = {},
             onImageToPdfClick = {},
             onPdfEditClick = {},
+            onScanClick = {},
             onSettingsClick = {}
         )
     }

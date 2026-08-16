@@ -1,8 +1,11 @@
 package com.masoudnaji.easysmartpdf.ui.screens.pageorganizer
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -50,7 +53,8 @@ fun PageOrganizerScreen(
     onZoomDismiss: () -> Unit,
     onErrorShown: () -> Unit,
     onConfirm: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    bottomActions: (@Composable ColumnScope.() -> Unit)? = null
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -117,6 +121,10 @@ fun PageOrganizerScreen(
                     .navigationBarsPadding()
                     .padding(Spacing.lg)
             ) {
+                if (bottomActions != null) {
+                    bottomActions()
+                    Spacer(modifier = Modifier.height(Spacing.sm))
+                }
                 PrimaryButton(
                     text = ctaText,
                     onClick = onConfirm,
